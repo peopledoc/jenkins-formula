@@ -45,4 +45,5 @@ Go back to your master and run:
 
 .. code-block:: console
 
-  salt '*' state.highstate
+  salt -G 'roles:jenkins-master' state.highstate
+  salt -G 'roles:jenkins-slave' state.highstate
