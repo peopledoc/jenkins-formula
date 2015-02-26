@@ -1,6 +1,10 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 
+include:
+  - jenkins.cli
+  - jenkins.api
+
 jre:
   pkg.latest:
     - name: openjdk-6-jre-headless
