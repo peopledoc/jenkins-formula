@@ -35,7 +35,9 @@ On the master:
    make install-master
 
 Connect your minions and master together. Note that your master is also a
-minion. Go back to your master and run:
+minion: `<http://docs.saltstack.com/en/latest/ref/configuration/minion.html#configuring-the-salt-minion>`_
+
+Go back to your master and run:
 
 .. code-block:: console
 
