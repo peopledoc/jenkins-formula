@@ -14,6 +14,7 @@ install-master:
 	apt-get install -y salt-master
 	test -d /etc/salt/master.d/ || mkdir /etc/salt/master.d/
 	$(RENDER) etc/ci-salt.conf > /etc/salt/master.d/ci-salt.conf
+	$(RENDER) etc/master.conf > /etc/salt/master.d/ci-salt-master.conf
 	/etc/init.d/salt-master restart
 	$(MAKE) install-minion ROLE=jenkins-master
 
