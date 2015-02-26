@@ -5,7 +5,7 @@ jre:
   pkg.latest:
     - name: openjdk-6-jre-headless
 
-user:
+jenkins_user:
   user.present:
     - name: jenkins
     - home: {{ home }}
