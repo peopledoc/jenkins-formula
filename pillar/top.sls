@@ -1,8 +1,4 @@
 base:
-  'roles:jenkins-master':
-    - match: grain
-    - jenkins
-
-  'roles:jenkins-slave':
-    - match: grain
+  'roles:jenkins-*':
+    - match: grain_pcre
     - jenkins
