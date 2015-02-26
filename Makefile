@@ -7,15 +7,28 @@ setup:
 	apt-get update -y
 	apt-get install -y salt-common msgpack-python python-git python-zmq
 
-RENDER=sed 's,PWD,$(shell pwd),g'
-.PHONY: install
-install:
-	test -d /etc/salt/minion.d/ || mkdir /etc/salt/minion.d/
-	$(RENDER) etc/ci-salt.conf > /etc/salt/minion.d/ci-salt.conf ;
+ROLE=jenkins-slave
+RENDER=sed "s,PWD,$(shell pwd),g;s,ROLE,$(ROLE),g"
+.PHONY: install-master
+install-master:
+	apt-get install -y salt-master
+	test -d /etc/salt/master.d/ || mkdir /etc/salt/master.d/
+	$(RENDER) etc/ci-salt.conf > /etc/salt/master.d/ci-salt.conf
+	/etc/init.d/salt-master restart
+	$(MAKE) install-minion ROLE=jenkins-master
 
-.PHONY: develop
-develop: install
-	$(RENDER) etc/masterless.conf > /etc/salt/minion.d/ci-salt-masterless.conf ;
+.PHONY: install-minion
+install-minion:
+	apt-get install -y salt-minion
+	test -d /etc/salt/minion.d/ || mkdir /etc/salt/minion.d/
+	$(RENDER) etc/minion.conf > /etc/salt/minion.d/ci-salt-minion.conf
+	/etc/init.d/salt-minion restart
+
+.PHONY: develop-masterless
+develop-masterless: install-masterless
+	test -d /etc/salt/minion.d/ || mkdir /etc/salt/minion.d/
+	$(RENDER) etc/ci-salt.conf > /etc/salt/minion.d/ci-salt.conf
+	$(RENDER) etc/masterless.conf > /etc/salt/minion.d/ci-salt-masterless.conf
 
 .PHONY: uninstall
 uninstall:
