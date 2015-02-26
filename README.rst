@@ -47,3 +47,10 @@ Go back to your master and run:
 
   salt -G 'roles:jenkins-master' state.highstate
   salt -G 'roles:jenkins-slave' state.highstate
+
+To uninstall, use:
+
+.. code-block:: console
+
+  salt -G 'roles:jenkins-master' state.sls jenkins.master.uninstall
+  salt -G 'roles:jenkins-slave' state.sls jenkins.slave.uninstall
