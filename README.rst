@@ -4,6 +4,10 @@
 
 Target system is debian wheezy.
 
+.. image:: ci-salt-design.jpg
+   :height: 800 px
+   :width: 600 px
+
 Develop masterless
 ==================
 
