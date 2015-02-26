@@ -7,9 +7,16 @@ setup:
 	apt-get update -y
 	apt-get install -y salt-common msgpack-python python-git python-zmq
 
-.PHONY: develop
-develop:
+RENDER=sed 's,PWD,$(shell pwd),g'
+.PHONY: install
+install:
 	test -d /etc/salt/minion.d/ || mkdir /etc/salt/minion.d/
-	for f in $$(find minion.d -name "*.conf") ; do \
-		sed "s,PWD,$$(pwd),g" $$f > /etc/salt/$$f ; \
-	done
+	$(RENDER) etc/ci-salt.conf > /etc/salt/minion.d/ci-salt.conf ;
+
+.PHONY: develop
+develop: install
+	$(RENDER) etc/masterless.conf > /etc/salt/minion.d/ci-salt-masterless.conf ;
+
+.PHONY: uninstall
+uninstall:
+	rm -vf /etc/salt/minion.d/ci-salt*.conf
