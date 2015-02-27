@@ -12,3 +12,7 @@ install_plugins:
 update_plugins:
   jenkins_plugins:
     - updated
+
+restart:
+  jenkins_running:
+    - restart
