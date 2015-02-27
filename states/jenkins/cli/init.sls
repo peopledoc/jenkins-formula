@@ -21,7 +21,6 @@ cli_jar:
       - user: jenkins_user
       - cmd: wait_master
 
-
 cli_script:
   file.managed:
     - name: /usr/local/bin/jenkins-cli
