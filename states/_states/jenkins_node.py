@@ -39,7 +39,7 @@ _create_xml_template = """\
 """
 
 
-def created(name, remote_fs='', ssh_port=22, **kwargs):
+def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
     ret = {
         'name': name,
         'changes': {},
@@ -52,7 +52,7 @@ def created(name, remote_fs='', ssh_port=22, **kwargs):
         node_slave_home=remote_fs,
         executors=2,
         ssh_port=ssh_port,
-        cred_id='',
+        cred_id=credential,
         user_id='',
         labels='')
 
@@ -91,7 +91,7 @@ def absent(name):
     }
 
     retcode, stdout, stderr = _cli('delete-node', name)
-    if retcode == 1:
+    if retcode != 0:
         if "No such slave" in stderr:
             ret['comment'] = "Already removed"
         else:
