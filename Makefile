@@ -26,7 +26,7 @@ install-minion:
 	/etc/init.d/salt-minion restart
 
 .PHONY: develop-masterless
-develop-masterless: install-masterless
+develop-masterless:
 	test -d /etc/salt/minion.d/ || mkdir /etc/salt/minion.d/
 	$(RENDER) etc/ci-salt.conf > /etc/salt/minion.d/ci-salt.conf
 	$(RENDER) etc/masterless.conf > /etc/salt/minion.d/ci-salt-masterless.conf
@@ -34,3 +34,4 @@ develop-masterless: install-masterless
 .PHONY: uninstall
 uninstall:
 	rm -vf /etc/salt/minion.d/ci-salt*.conf
+	rm -vf /etc/salt/master.d/ci-salt*.conf

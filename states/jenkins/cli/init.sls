@@ -3,15 +3,25 @@
 {% set ip_addrs = salt['publish.publish']('roles:jenkins-master', 'network.ip_addrs', expr_form='grain') %}
 {% set master_ip = ip_addrs.values()[0][0] %}
 
+curl_pkg:
+  pkg.latest:
+    - name: curl
+
+wait_master:
+  cmd.run:
+    - name: curl --silent --show-error --head --retry 20 http://{{ master_ip }}/
+
 cli_jar:
   cmd.run:
     - name: wget http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
     - user: jenkins
     - cwd: {{ home }}
     - creates: {{ home }}/jenkins-cli.jar
+    - require:
+      - user: jenkins_user
+      - cmd: wait_master
 
-
-cli_script:
+jenkins_cli:
   file.managed:
     - name: /usr/local/bin/jenkins-cli
     - source: salt://jenkins/files/jenkins-cli
