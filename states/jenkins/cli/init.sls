@@ -21,7 +21,7 @@ cli_jar:
       - user: jenkins_user
       - cmd: wait_master
 
-cli_script:
+jenkins_cli:
   file.managed:
     - name: /usr/local/bin/jenkins-cli
     - source: salt://jenkins/files/jenkins-cli

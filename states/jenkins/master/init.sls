@@ -19,3 +19,13 @@ extend:
     service:
       - require:
         - file: /etc/nginx/sites-enabled/jenkins.conf
+
+jenkins_config:
+  file.managed:
+    - name: {{ home }}/config.xml
+    - template: jinja
+    - source: salt://jenkins/master/config.xml
+  cmd.run:
+    - name: /usr/local/bin/jenkins-cli reload-configuration
+    - watch:
+      - file: jenkins_config
