@@ -1,5 +1,7 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
+{% set user = jenkins.get('user', 'jenkins') -%}
+{% set group = jenkins.get('group', user) -%}
 
 include:
   - jenkins
@@ -23,12 +25,11 @@ extend:
 jenkins_config:
   file.managed:
     - name: {{ home }}/config.xml
+    - mode: 0644
+    - user: {{ user }}
+    - group: {{ group }}
     - template: jinja
     - source: salt://jenkins/master/config.xml
-  cmd.run:
-    - name: /usr/local/bin/jenkins-cli reload-configuration
-    - watch:
-      - file: jenkins_config
 
 jenkins_version:
   cmd.run:
@@ -37,3 +38,19 @@ jenkins_version:
     - watch:
       - file: jenkins_config
 
+jenkins_nodeMonitors:
+  file.managed:
+    - name: {{ home }}/nodeMonitors.xml
+    - mode: 0644
+    - user: {{ user }}
+    - group: {{ group }}
+    - template: jinja
+    - source: salt://jenkins/master/nodeMonitors.xml
+
+reload:
+  cmd.run:
+    # safe-restart is required by nodeMonitors
+    - name: /usr/local/bin/jenkins-cli safe-restart
+    - watch:
+      - file: jenkins_config
+      - file: jenkins_nodeMonitors
