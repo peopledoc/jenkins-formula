@@ -20,3 +20,8 @@ allow_master_key:
   ssh_auth.present:
     - name: {{ master_key }}
     - user: {{ user }}
+
+node:
+  jenkins_node.created:
+    - name: {{ grains['host'] }}
+    - remote_fs: {{ home }}

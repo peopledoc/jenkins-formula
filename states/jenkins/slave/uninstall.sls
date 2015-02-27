@@ -4,6 +4,12 @@
 include:
   - jenkins.cli.uninstall
 
+remove_node:
+  jenkins_node.absent:
+    - name: {{ grains['host'] }}
+    # Execute CLI before CLI is uninstalled
+    - order: 1
+
 delete_user:
   user.absent:
     - name: jenkins
