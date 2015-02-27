@@ -1,5 +1,8 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
+{% set user = jenkins.get('user', 'jenkins') -%}
+{% set keys = salt['publish.publish']('roles:jenkins-master', 'ssh_key.pub', user, expr_form='grain') %}
+{% set master_key = keys.values()[0] %}
 
 include:
   - jenkins.cli
@@ -13,8 +16,7 @@ jenkins_user:
     - name: jenkins
     - home: {{ home }}
 
-ssh_key:
-  cmd.run:
-    - name: ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
-    - user: jenkins
-    - creates: {{ home }}/.ssh/id_rsa
+allow_master_key:
+  ssh_auth.present:
+    - name: {{ master_key }}
+    - user: {{ user }}

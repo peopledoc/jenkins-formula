@@ -54,3 +54,9 @@ reload:
     - watch:
       - file: jenkins_config
       - file: jenkins_nodeMonitors
+
+ssh_key:
+  cmd.run:
+    - name: ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
+    - user: {{ user }}
+    - creates: {{ home }}/.ssh/id_rsa
