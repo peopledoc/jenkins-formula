@@ -32,6 +32,8 @@ jenkins_config:
     - template: jinja
     - source: salt://jenkins/master/config.xml
 
+# We can't use a template var, because the state is generated and sent to the
+# minion before jenkins is up.
 jenkins_version:
   cmd.run:
     - name: sed -i s/JENKINS_VERSION/$(/usr/local/bin/jenkins-cli version)/g {{ home }}/config.xml
