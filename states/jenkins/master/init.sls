@@ -5,6 +5,7 @@ include:
   - jenkins
   - jenkins.nginx
   - jenkins.cli
+  - jenkins.plugins.update
 
 service_jenkins:
   service.enabled:
