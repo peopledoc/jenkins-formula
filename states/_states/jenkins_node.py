@@ -1,23 +1,4 @@
 # -*- coding: utf-8 -*-
-import subprocess
-
-
-def _cli(*args, **kwargs):
-    args = ('/usr/local/bin/jenkins-cli',) + args
-
-    p = subprocess.Popen(
-        args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        stdin=subprocess.PIPE)
-
-    input_ = kwargs.get('input_')
-    if input_:
-        p.stdin.write(input_)
-    p.stdin.close()
-    p.wait()
-    return p.returncode, p.stdout.read(), p.stderr.read()
-
 
 _create_xml_template = """\
 <slave>
@@ -40,6 +21,8 @@ _create_xml_template = """\
 
 
 def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
+    _runcli = __salt__['jenkins.runcli']  # noqa
+
     ret = {
         'name': name,
         'changes': {},
@@ -47,7 +30,7 @@ def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
         'comment': ''
     }
 
-    data = _create_xml_template.format(
+    new = _create_xml_template.format(
         node_name=name,
         node_slave_home=remote_fs,
         executors=2,
@@ -56,33 +39,35 @@ def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
         user_id='',
         labels='')
 
-    retcode, stdout, stderr = _cli('get-node', name)
-    if retcode == 0:
-        current = stdout
-        if data == current:
-            ret['result'] = True
-            ret['comment'] = "Node is created and config up to date"
-            return ret
-        else:
-            command = 'update-node'
-    else:
+    try:
+        current = _runcli('get-node', name)
+    except Exception:
         current = ''
         command = 'create-node'
+    else:
+        command = 'update-node'
 
-    retcode, stdout, stderr = _cli(command, name, input_=data)
-    if retcode != 0:
-        ret['comment'] = stderr
+    if new == current:
+        ret['result'] = True
+        ret['comment'] = "Node is created and config is up to date"
+        return ret
+
+    try:
+        _runcli(command, name, input_=new)
+    except Exception, e:
+        ret['comment'] = e.message
         return ret
 
     ret['changes'][name] = {
         'old': current,
-        'new': data,
+        'new': new,
     }
     ret['result'] = True
     return ret
 
 
 def absent(name):
+    _runcli = __salt__['jenkins.runcli']  # noqa
     ret = {
         'name': name,
         'changes': {},
@@ -90,12 +75,13 @@ def absent(name):
         'comment': ''
     }
 
-    retcode, stdout, stderr = _cli('delete-node', name)
-    if retcode != 0:
-        if "No such slave" in stderr:
+    try:
+        _runcli('delete-node', name)
+    except Exception, e:
+        if "No such slave" in e.message:
             ret['comment'] = "Already removed"
         else:
-            ret['comment'] = stderr
+            ret['comment'] = e.message
             return ret
     else:
         ret['changes'][name] = {

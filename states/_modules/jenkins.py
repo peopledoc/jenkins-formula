@@ -1,23 +1,37 @@
 # -*- coding: utf-8 -*-
 import logging
+import subprocess
+import itertools
+import requests
+import time
+
+import salt.exceptions as exc
+
 
 log = logging.getLogger(__name__)
 
 JENKINS_URL = 'http://127.0.0.1:8080'
 
 
-def runcli(cmd, extras=None):
+def runcli(*args, **kwargs):
+    args = ('/usr/local/bin/jenkins-cli',) + args
 
-    cmd = '/usr/local/bin/jenkins-cli {0}'.format(cmd)
-    log.debug(cmd)
+    p = subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE)
 
-    extras = extras or []
+    input_ = kwargs.get('input_')
+    if input_:
+        p.stdin.write(input_)
+    p.stdin.close()
+    p.wait()
 
-    import subprocess
-    p = subprocess.Popen(cmd.split(' ') + extras, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+    if p.returncode != 0:
+        raise exc.CommandExecutionError(p.stderr.read())
 
-    return p.communicate()
+    return p.stdout.read()
 
 
 def restart(jenkins_url=None, wait_online=True):
@@ -30,23 +44,20 @@ def restart(jenkins_url=None, wait_online=True):
         Boolean flag if we want to wait online after install (default: True).
     """
 
-    stdout, stderr = runcli('safe-restart')
-    if stderr or not wait_online:
-        return stderr
+    runcli('safe-restart')
 
-    # wait
-    import itertools
-    import requests
-    import time
-    max_tries = 10 
-    count = itertools.count()  
+    if not wait_online:
+        return
+
+    url = jenkins_url or JENKINS_URL
+    count = itertools.count()
     while count.next() < 10:
         try:
-            response = requests.get(jenkins_url or JENKINS_URL)
+            response = requests.get(url)
         except requests.ConnectionError:
             pass
-        # sleep between tries and last 200
-        time.sleep(2)
-        # ok
+        # sleep between tries and last on 200
+        time.sleep(1)
         if response.status_code == 200:
-            break
+            return
+    raise exc.CommandExecutionError('Jenkins fails to reload in time')
