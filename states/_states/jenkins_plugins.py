@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-RE_UPDATED = '(\w.+?)\s.*\s(\d+.*) \((.*)\)'
+import re
 
 
 def updated(name, jenkins_url=None, pkgs=None, restart=True, updateall=True,
@@ -26,6 +25,9 @@ def updated(name, jenkins_url=None, pkgs=None, restart=True, updateall=True,
     wait_online
         Boolean flag if we want to wait online after install (default: True).
     """
+    _runcli = __salt__['jenkins.runcli']  # noqa
+    _restart = __salt__['jenkins.restart']  # noqa
+
     ret = {
         'name': name,
         'changes': {},
@@ -33,21 +35,19 @@ def updated(name, jenkins_url=None, pkgs=None, restart=True, updateall=True,
         'comment': ''
     }
 
-    _runcli = __salt__['jenkins.runcli']
-
-    # list
-    stdout, stderr = _runcli('list-plugins')
-    if stderr:
-        ret['comment'] = stderr
+    try:
+        stdout = _runcli('list-plugins')
+    except Exception, e:
+        ret['comment'] = e.message
         return ret
 
-    # update
-    import re
-    for l in stdout.strip().split('\n'):
+    # match with ex.: 'maven-plugin  Maven plugin  2.7.1 (2.8)'
+    RE_UPDATED = '(\w.+?)\s.*\s(\d+.*) \((.*)\)'
 
+    for l in stdout.strip().split('\n'):
         m = re.match(RE_UPDATED, l)
-        # not match with ex.: 'maven-plugin  Maven plugin  2.7.1 (2.8)'
         if not m:
+            # no need to update
             continue
         short_name, current, update = m.groups()
         ret['changes'][short_name] = {
@@ -55,22 +55,20 @@ def updated(name, jenkins_url=None, pkgs=None, restart=True, updateall=True,
             'new': update,
         }
 
-        stdout, stderr = _runcli('install-plugin {0}'.format(short_name))
-        if stderr:
-            ret['comment'] = stderr
+        try:
+            _runcli('install-plugin', short_name)
+        except Exception, e:
+            ret['comment'] = e.message
             return ret
 
-    # not restart
     ret['result'] = True
     if not restart or not ret['changes']:
         return ret
 
-    _restart = __salt__['jenkins.restart']
-
-    # restart
-    stderr = _restart(jenkins_url=jenkins_url, wait_online=wait_online)
-    if stderr:
-        ret['comment'] = stderr
+    try:
+        _restart(jenkins_url=jenkins_url, wait_online=wait_online)
+    except Exception, e:
+        ret['comment'] = e.message
         ret['result'] = False
         return ret
 
