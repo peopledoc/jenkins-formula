@@ -2,6 +2,37 @@
 import re
 
 
+def installed(name, names=None, **kwargs):
+    """Ensures jenkins plugins are present.
+
+    name
+        The name of one specific plugin to ensure.
+
+    names
+        The names of specifics plugins to ensure.
+    """
+    if not names:
+        names = [names]
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    _runcli = __salt__['jenkins.runcli']
+
+    for short_name in names:
+        stdout, stderr = _runcli('install-plugin {0}'.format(short_name))
+        if stderr:
+            ret['comment'] = stderr
+            return ret
+
+    ret['result'] = True
+    return ret
+
+
 def updated(name, jenkins_url=None, pkgs=None, restart=True, updateall=True,
             wait_online=True, **kwargs):
     """Updates jenkins plugins.

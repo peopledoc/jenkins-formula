@@ -8,7 +8,7 @@ include:
   - jenkins
   - jenkins.nginx
   - jenkins.cli
-  - jenkins.plugins.update
+  - jenkins.plugins
 
 service_jenkins:
   service.enabled:
