@@ -3,7 +3,6 @@
 
 include:
   - jenkins.cli
-  - jenkins.api
 
 jre:
   pkg.latest:
