@@ -1,3 +1,6 @@
+{% set jenkins = pillar.get('jenkins', {}) -%}
+{% set home = jenkins.get('home', '/usr/local/jenkins') -%}
+
 include:
   - jenkins
   - jenkins.nginx
@@ -9,6 +12,9 @@ service_jenkins:
     - name: jenkins
 
 extend:
+  jenkins_user:
+    user.present:
+      - home: {{ home }}
   nginx:
     service:
       - require:
