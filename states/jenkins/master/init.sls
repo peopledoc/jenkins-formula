@@ -29,3 +29,11 @@ jenkins_config:
     - name: /usr/local/bin/jenkins-cli reload-configuration
     - watch:
       - file: jenkins_config
+
+jenkins_version:
+  cmd.run:
+    - name: sed -i s/JENKINS_VERSION/$(/usr/local/bin/jenkins-cli version)/g {{ home }}/config.xml
+    - user: jenkins
+    - watch:
+      - file: jenkins_config
+
