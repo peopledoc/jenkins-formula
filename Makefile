@@ -34,3 +34,4 @@ develop-masterless:
 .PHONY: uninstall
 uninstall:
 	rm -vf /etc/salt/minion.d/ci-salt*.conf
+	rm -vf /etc/salt/master.d/ci-salt*.conf
