@@ -53,7 +53,7 @@ def restart(jenkins_url=None, wait_online=True):
     count = itertools.count()
     while count.next() < 30:
         try:
-            response = requests.get(url)
+            response = requests.head(url)
         except requests.ConnectionError:
             pass
         # sleep between tries and last on 200
