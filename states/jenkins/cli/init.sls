@@ -2,6 +2,7 @@
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set ip_addrs = salt['publish.publish']('roles:jenkins-master', 'network.ip_addrs', expr_form='grain') %}
 {% set master_ip = ip_addrs.values()[0][0] %}
+{% set jenkins_user = 'jenkins_user_slave' if 'jenkins-slave' in salt['grains.get']('roles') else 'jenkins_user' -%}
 
 curl_pkg:
   pkg.latest:
@@ -18,7 +19,7 @@ cli_jar:
     - cwd: {{ home }}
     - creates: {{ home }}/jenkins-cli.jar
     - require:
-      - user: jenkins_user
+      - user: {{ jenkins_user }}
       - cmd: wait_master
 
 jenkins_cli:
