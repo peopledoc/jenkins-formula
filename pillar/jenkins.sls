@@ -1,7 +1,8 @@
 jenkins:
   home: /var/lib/jenkins
   plugins:
-    - github
+    installed:
+      - github
 
 nginx:
   use_upstart: false

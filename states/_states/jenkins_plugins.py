@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
 import re
+import shutil
 
 import salt.exceptions as exc
 
@@ -143,6 +145,60 @@ def installed(name, names=None, **kwargs):
             'old': None,
             'new': info,
         }
+
+    ret['result'] = True
+    return ret
+
+
+def _uninstall(short_name):
+
+    result = []
+
+    home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')
+    plugin_dir = os.path.join(home, 'plugins')
+    for item in os.listdir(plugin_dir):
+        # next
+        if not item.startswith(short_name):
+            continue
+        # remove
+        path = os.path.join(plugin_dir, item)
+        if item == short_name and os.path.isdir(path):
+            shutil.rmtree(path)
+            result.append(path)
+        elif item in ['{0}{1}'.format(short_name, ext) for ext in ['.hpi', '.jpi']]:  # noqa
+            os.remove(path)
+            result.append(path)
+
+    return result
+
+
+def removed(name, names=None):
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    if not names:
+        names = [name]
+
+    for short_name in names:
+
+        # get info before install
+        try:
+            status, info = _info(short_name)
+        except exc.CommandExecutionError as e:
+            ret['comment'] = e.message
+            return ret
+
+        # removed
+        if status == IS_INSTALLED and _uninstall(short_name):
+            ret['changes'][short_name] = {
+                'old': info,
+                'new': None,
+            }
 
     ret['result'] = True
     return ret
