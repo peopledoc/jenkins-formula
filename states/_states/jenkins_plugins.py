@@ -117,34 +117,15 @@ def installed(name, names=None, **kwargs):
 
         # install
         try:
-            stdout = _runcli('install-plugin {0}'.format(short_name))
+            _runcli('install-plugin {0}'.format(short_name))
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
-            return ret
-
-        # get info
-        try:
-            stdout = _runcli('list-plugins {0}'.format(short_name))
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
-
-        # get info after install
-        try:
-            status, info = _info(short_name)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
-
-        # invalid info
-        if status == NOT_AVAILABLE:
-            ret['comment'] = info
             return ret
 
         # fresh install
         ret['changes'][short_name] = {
             'old': None,
-            'new': info,
+            'new': True,
         }
 
     ret['result'] = True
