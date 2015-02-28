@@ -11,6 +11,7 @@ include:
   - jenkins.cli
   - jenkins.plugins
   - supervisor.service
+  - hookforward
 
 service_jenkins:
   service.enabled:

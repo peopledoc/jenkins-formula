@@ -3,6 +3,7 @@ all:
 
 .PHONY: setup
 setup:
+	echo "deb http://ftp.us.debian.org/debian wheezy-backports main" > /etc/apt/sources.list.d/wheezy-backports.list
 	echo "deb http://debian.saltstack.com/debian wheezy-saltstack-2014-07 main" > /etc/apt/sources.list.d/salt.list
 	apt-get update -y
 	apt-get install -y salt-common msgpack-python python-git python-zmq
