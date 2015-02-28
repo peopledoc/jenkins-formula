@@ -34,6 +34,14 @@ update_plugins:
 {% endfor -%}
 {% endif %}
 
-restart:
-  jenkins_running:
+restart_after_install:
+  jenkins:
     - restart
+    - watch:
+{% if removed %}
+      - jenkins_plugins: remove_plugins
+{% endif %}
+{% if installed %}
+      - jenkins_plugins: install_plugins
+{% endif %}
+      - jenkins_plugins: update_plugins

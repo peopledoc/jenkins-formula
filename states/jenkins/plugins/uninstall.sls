@@ -23,6 +23,13 @@ reinstall_removed_plugins:
 {% endfor -%}
 {% endif %}
 
-restart:
-  jenkins_running:
+restart_after_uninstall:
+  jenkins:
     - restart
+    - watch:
+{% if installed %}
+      - jenkins_plugins: remove_installed_plugins
+{% endif %}
+{% if removed %}
+      - jenkins_plugins: reinstall_removed_plugins
+{% endif %}
