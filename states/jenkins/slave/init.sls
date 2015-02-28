@@ -12,7 +12,7 @@ jre:
   pkg.latest:
     - name: openjdk-6-jre-headless
 
-jenkins_user:
+jenkins_user_slave:
   user.present:
     - name: jenkins
     - home: {{ home }}
