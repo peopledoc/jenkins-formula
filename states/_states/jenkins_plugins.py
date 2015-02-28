@@ -113,10 +113,6 @@ def installed(name, names=None, **kwargs):
 
         # installed
         if status == IS_INSTALLED:
-            ret['changes'][short_name] = {
-                'old': info,
-                'new': None,
-            }
             continue
 
         # install
