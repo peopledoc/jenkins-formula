@@ -105,7 +105,7 @@ def installed(name, names=None, **kwargs):
             return ret
 
         # installed
-        if IS_INSTALLED:
+        if status == IS_INSTALLED:
             ret['changes'][short_name] = {
                 'old': info,
                 'new': None,
@@ -134,7 +134,7 @@ def installed(name, names=None, **kwargs):
             return ret
 
         # invalid info
-        if NOT_AVAILABLE:
+        if status == NOT_AVAILABLE:
             ret['comment'] = info
             return ret
 
