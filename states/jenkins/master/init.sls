@@ -5,10 +5,12 @@
 {% set ssh_credential = jenkins.get('ssh_credential', '0c952d99-54de-44c4-99d8-86f2c3acf170') %}
 
 include:
+  - python
   - jenkins
   - jenkins.nginx
   - jenkins.cli
   - jenkins.plugins
+  - supervisor.service
 
 service_jenkins:
   service.enabled:

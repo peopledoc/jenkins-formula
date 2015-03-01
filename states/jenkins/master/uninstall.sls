@@ -4,6 +4,8 @@
 include:
   - jenkins.cli.uninstall
   - jenkins.plugins.uninstall
+  - supervisor.uninstall
+  - python.uninstall
 
 remove_site:
   file.absent:
