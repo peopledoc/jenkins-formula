@@ -3,6 +3,7 @@
 
 include:
   - jenkins.cli.uninstall
+  - jenkins.plugins.uninstall
 
 remove_site:
   file.absent:
