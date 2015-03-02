@@ -1,0 +1,5 @@
+# Target this minion for generated docs
+
+jenkins:
+  labels:
+    - docs
