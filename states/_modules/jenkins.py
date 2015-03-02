@@ -14,7 +14,7 @@ JENKINS_URL = 'http://127.0.0.1:8080'
 
 
 def runcli(*args, **kwargs):
-    args = ('/usr/local/bin/jenkins-cli',) + args
+    args = ('/usr/local/sbin/jenkins-cli',) + args
 
     p = subprocess.Popen(
         args,
