@@ -22,7 +22,7 @@ cli_jar:
 jenkins_cli:
   file.managed:
     - name: /usr/local/sbin/jenkins-cli
-    - source: salt://jenkins/files/jenkins-cli
+    - source: salt://jenkins/cli/jenkins-cli
     - mode: 0750
     - template: jinja
     - defaults:
