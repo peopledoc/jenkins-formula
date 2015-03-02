@@ -2,7 +2,7 @@
 
 remove_cli:
   file.absent:
-    - name: /usr/local/bin/jenkins-cli
+    - name: /usr/local/sbin/jenkins-cli
 
 remove_jar:
   file.absent:
