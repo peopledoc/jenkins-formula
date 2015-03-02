@@ -5,7 +5,6 @@ include:
   - jenkins.cli.uninstall
   - hookforward.uninstall
   - supervisor.uninstall
-  - python.uninstall
 
 remove_site:
   file.absent:
