@@ -68,9 +68,8 @@ jenkins_nodeMonitors:
     - source: salt://jenkins/master/nodeMonitors.xml
 
 reload:
-  cmd.run:
-    # safe-restart is required by nodeMonitors
-    - name: /usr/local/bin/jenkins-cli safe-restart
+  # safe-restart is required by nodeMonitors
+  jenkins.restart:
     - watch:
       - file: jenkins_config
       - file: jenkins_credentials
