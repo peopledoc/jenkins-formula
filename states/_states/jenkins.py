@@ -17,9 +17,10 @@ def restart(name, wait_online=True, **kwargs):
         'comment': ''
     }
 
-    stderr = __salt__['jenkins.restart'](wait_online=wait_online)
-    if stderr:
-        ret['comment'] = stderr
+    try:
+        __salt__['jenkins.restart'](wait_online=wait_online)  # noqa
+    except Exception, e:
+        ret['comment'] = e.message
         ret['result'] = False
         return ret
 
