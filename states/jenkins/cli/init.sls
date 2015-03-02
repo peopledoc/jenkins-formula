@@ -11,6 +11,10 @@ wait_master:
   cmd.run:
     - name: curl --silent --show-error --head --retry 20 http://{{ master_ip }}/
 
+libdir:
+  file.directory:
+    - name: {{ libdir }}
+
 cli_jar:
   cmd.run:
     - name: wget http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
