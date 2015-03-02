@@ -15,20 +15,16 @@ wait_master:
 cli_jar:
   cmd.run:
     - name: wget http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
-    - user: jenkins
     - cwd: {{ home }}
     - creates: {{ home }}/jenkins-cli.jar
     - require:
-      - user: {{ jenkins_user }}
       - cmd: wait_master
 
 jenkins_cli:
   file.managed:
-    - name: /usr/local/bin/jenkins-cli
+    - name: /usr/local/sbin/jenkins-cli
     - source: salt://jenkins/files/jenkins-cli
     - mode: 0750
-    - user: root
-    - group: jenkins
     - template: jinja
     - defaults:
         jar: {{ home }}/jenkins-cli.jar
