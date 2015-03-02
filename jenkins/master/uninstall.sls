@@ -3,7 +3,6 @@
 
 include:
   - jenkins.cli.uninstall
-  - jenkins.plugins.uninstall
   - hookforward.uninstall
   - supervisor.uninstall
   - python.uninstall
