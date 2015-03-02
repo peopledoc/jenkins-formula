@@ -1,5 +1,5 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
-{% set home = jenkins.get('home', '/usr/local/jenkins') -%}
+{% set libdir = '/usr/lib/jenkins' -%}
 
 remove_cli:
   file.absent:
@@ -7,4 +7,4 @@ remove_cli:
 
 remove_cli_jar:
   file.absent:
-    - name: {{ home }}/jenkins-cli.jar
+    - name: {{ libdir }}/jenkins-cli.jar
