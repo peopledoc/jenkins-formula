@@ -12,6 +12,10 @@ jre:
   pkg.latest:
     - name: openjdk-6-jre-headless
 
+ssh:
+  pkg.latest:
+    - name: openssh-server
+
 jenkins_user_slave:
   user.present:
     - name: jenkins
