@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import difflib
+
+
 _create_xml_template = """\
+<?xml version="1.0" encoding="UTF-8"?>
 <slave>
   <name>{node_name}</name>
   <description></description>
@@ -9,15 +13,14 @@ _create_xml_template = """\
   <mode>NORMAL</mode>
   <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
   <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
-  <host>{node_name}</host>
-  <port>{ssh_port}</port>
-  <credentialsId>{cred_id}</credentialsId>
+    <host>{node_name}</host>
+    <port>{ssh_port}</port>
+    <credentialsId>{cred_id}</credentialsId>
   </launcher>
   <label>{labels}</label>
   <nodeProperties/>
   <userId>{user_id}</userId>
-</slave>
-"""
+</slave>"""
 
 
 def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
@@ -52,15 +55,18 @@ def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
         ret['comment'] = "Node is created and config is up to date"
         return ret
 
-    try:
-        _runcli(command, name, input_=new)
-    except Exception, e:
-        ret['comment'] = e.message
-        return ret
+    if not __opts__['test']:  # noqa
+        try:
+            _runcli(command, name, input_=new)
+        except Exception, e:
+            ret['comment'] = e.message
+            return ret
 
+    diff = '\n'.join(difflib.unified_diff(
+        current.splitlines(), new.splitlines()))
+    ret['comment'] = 'Changed'
     ret['changes'][name] = {
-        'old': current,
-        'new': new,
+        'diff': diff,
     }
     ret['result'] = True
     return ret
