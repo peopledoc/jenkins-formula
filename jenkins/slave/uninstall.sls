@@ -22,4 +22,3 @@ remove_pkgs:
   pkg.purged:
     - pkgs:
       - openjdk-6-jre-headless
-      - openssh-server
