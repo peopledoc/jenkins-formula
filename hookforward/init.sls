@@ -1,5 +1,7 @@
+{% if grains['oscodename'] != 'jessie' -%}
 include:
   - supervisor.service
+{%- endif %}
 
 nodejs:
   pkg.installed

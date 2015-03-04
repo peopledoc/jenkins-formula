@@ -1,5 +1,7 @@
+{% if grains['oscodename'] != 'jessie' -%}
 include:
   - supervisor.uninstall
+{%- endif %}
 
 remove_hookforward:
   cmd.run:
