@@ -21,4 +21,4 @@ delete_home:
 remove_pkgs:
   pkg.purged:
     - pkgs:
-      - openjdk-6-jre-headless
+      - default-jre-headless

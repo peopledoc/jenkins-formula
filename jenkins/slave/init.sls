@@ -10,7 +10,7 @@ include:
 
 jre:
   pkg.latest:
-    - name: openjdk-6-jre-headless
+    - name: default-jre-headless
 
 ssh:
   pkg.latest:
