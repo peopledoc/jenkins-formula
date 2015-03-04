@@ -23,7 +23,7 @@ _create_xml_template = """\
 </slave>"""
 
 
-def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
+def present(name, credential, remote_fs='', ssh_port=22, **kwargs):
     _runcli = __salt__['jenkins.runcli']  # noqa
 
     ret = {
@@ -52,28 +52,33 @@ def created(name, credential, remote_fs='', ssh_port=22, **kwargs):
 
     if new == current:
         ret['result'] = True
-        ret['comment'] = "Node is created and config is up to date"
+        ret['comment'] = 'Node not changed.'
         return ret
 
     if not __opts__['test']:  # noqa
         try:
-            _runcli(command, name, input_=new)
+            ret['comment'] = _runcli(command, name, input_=new)
         except Exception, e:
             ret['comment'] = e.message
             return ret
+        else:
+            ret['result'] = True
+    else:
+        ret['result'] = None
 
     diff = '\n'.join(difflib.unified_diff(
         current.splitlines(), new.splitlines()))
+
     ret['comment'] = 'Changed'
     ret['changes'][name] = {
         'diff': diff,
     }
-    ret['result'] = True
     return ret
 
 
 def absent(name):
     _runcli = __salt__['jenkins.runcli']  # noqa
+
     ret = {
         'name': name,
         'changes': {},
@@ -82,18 +87,24 @@ def absent(name):
     }
 
     try:
-        _runcli('delete-node', name)
-    except Exception, e:
-        if "No such slave" in e.message:
-            ret['comment'] = "Already removed"
-        else:
+        current = _runcli('get-node', name)
+    except Exception:
+        ret['comment'] = 'Already removed'
+        return ret
+
+    if not __opts__['test']:  # noqa
+        try:
+            ret['comment'] = _runcli('delete-node', name)
+        except Exception, e:
             ret['comment'] = e.message
             return ret
+        else:
+            ret['result'] = True
     else:
-        ret['changes'][name] = {
-            'old': 'present',
-            'new': 'absent',
-        }
+        ret['result'] = None
 
-    ret['result'] = True
+    ret['changes'][name] = {
+        'old': 'present',
+        'new': 'absent',
+    }
     return ret
