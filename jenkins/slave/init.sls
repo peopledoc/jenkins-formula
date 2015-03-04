@@ -29,5 +29,6 @@ allow_master_key:
 node:
   jenkins_node.present:
     - name: {{ grains['host'] }}
+    - host: {{ grains['fqdn'] }}
     - remote_fs: {{ home }}
     - credential: {{ ssh_credential }}

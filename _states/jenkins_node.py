@@ -13,7 +13,7 @@ _create_xml_template = """\
   <mode>NORMAL</mode>
   <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
   <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
-    <host>{node_name}</host>
+    <host>{host}</host>
     <port>{ssh_port}</port>
     <credentialsId>{cred_id}</credentialsId>
   </launcher>
@@ -23,7 +23,7 @@ _create_xml_template = """\
 </slave>"""
 
 
-def present(name, credential, remote_fs='', ssh_port=22, **kwargs):
+def present(name, credential, host=None, remote_fs='', ssh_port=22, **kwargs):
     _runcli = __salt__['jenkins.runcli']  # noqa
 
     ret = {
@@ -35,11 +35,12 @@ def present(name, credential, remote_fs='', ssh_port=22, **kwargs):
 
     new = _create_xml_template.format(
         node_name=name,
+        host=host or name,
         node_slave_home=remote_fs,
         executors=2,
         ssh_port=ssh_port,
         cred_id=credential,
-        user_id='',
+        user_id='anonymous',
         labels='')
 
     try:
@@ -87,9 +88,10 @@ def absent(name):
     }
 
     try:
-        current = _runcli('get-node', name)
+        _runcli('get-node', name)
     except Exception:
         ret['comment'] = 'Already removed'
+        ret['result'] = True
         return ret
 
     if not __opts__['test']:  # noqa
