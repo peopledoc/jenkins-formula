@@ -88,9 +88,10 @@ def absent(name):
     }
 
     try:
-        current = _runcli('get-node', name)
+        _runcli('get-node', name)
     except Exception:
         ret['comment'] = 'Already removed'
+        ret['result'] = True
         return ret
 
     if not __opts__['test']:  # noqa
