@@ -4,7 +4,6 @@
 include:
   - jenkins.cli.uninstall
   - hookforward.uninstall
-  - supervisor.uninstall
 
 remove_site:
   file.absent:
@@ -19,6 +18,7 @@ remove_pkgs:
     - pkgs:
       - jenkins
       - nginx-full
+      - nginx-common
 
 remove_user:
   user.absent:

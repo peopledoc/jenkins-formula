@@ -9,8 +9,15 @@ include:
   - jenkins.nginx
   - jenkins.cli
   - jenkins.plugins
-  - supervisor.service
   - hookforward
+
+{% if grains['oscodename'] == 'jessie' -%}
+patch_nginx_conf:
+  file.comment:
+    - name: /etc/nginx/nginx.conf
+    - regex: daemon
+    - char: '# '
+{%- endif %}
 
 service_jenkins:
   service.enabled:
@@ -24,6 +31,11 @@ extend:
     service:
       - require:
         - file: /etc/nginx/sites-enabled/jenkins.conf
+{%- if grains['oscodename'] == 'jessie' %}
+    pkg:
+      - require:
+        - file: patch_nginx_conf
+{%- endif %}
 
 jenkins_config:
   file.managed:
@@ -33,15 +45,6 @@ jenkins_config:
     - group: {{ group }}
     - template: jinja
     - source: salt://jenkins/master/config.xml
-
-# We can't use a template var, because the state is generated and sent to the
-# minion before jenkins is up.
-jenkins_version:
-  cmd.run:
-    - name: sed -i s/JENKINS_VERSION/$(/usr/local/bin/jenkins-cli version)/g {{ home }}/config.xml
-    - user: jenkins
-    - watch:
-      - file: jenkins_config
 
 ssh_key:
   cmd.run:
