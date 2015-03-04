@@ -10,6 +10,8 @@ curl_pkg:
 wait_master:
   cmd.run:
     - name: curl --silent --show-error --head --retry 20 http://{{ master_ip }}/
+    - require:
+      - pkg: curl_pkg
 
 libdir:
   file.directory:
