@@ -12,6 +12,14 @@ include:
   - supervisor.service
   - hookforward
 
+{% if grains['oscodename'] == 'jessie' -%}
+patch_nginx_conf:
+  file.comment:
+    - name: /etc/nginx/nginx.conf
+    - regex: daemon
+    - char: '# '
+{%- endif %}
+
 service_jenkins:
   service.enabled:
     - name: jenkins
@@ -24,6 +32,11 @@ extend:
     service:
       - require:
         - file: /etc/nginx/sites-enabled/jenkins.conf
+{%- if grains['oscodename'] == 'jessie' %}
+    pkg:
+      - require:
+        - file: patch_nginx_conf
+{%- endif %}
 
 jenkins_config:
   file.managed:

@@ -19,6 +19,7 @@ remove_pkgs:
     - pkgs:
       - jenkins
       - nginx-full
+      - nginx-common
 
 remove_user:
   user.absent:
