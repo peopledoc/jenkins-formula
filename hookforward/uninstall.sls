@@ -1,3 +1,6 @@
+include:
+  - supervisor.uninstall
+
 remove_hookforward:
   cmd.run:
     - name: npm uninstall -g hookforward

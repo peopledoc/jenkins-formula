@@ -1,3 +1,6 @@
+include:
+  - supervisor.service
+
 nodejs:
   pkg.installed
 

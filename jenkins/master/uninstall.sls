@@ -4,7 +4,6 @@
 include:
   - jenkins.cli.uninstall
   - hookforward.uninstall
-  - supervisor.uninstall
 
 remove_site:
   file.absent:
