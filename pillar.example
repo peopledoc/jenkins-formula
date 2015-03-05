@@ -1,6 +1,10 @@
 docker:
   opts: --insecure-registry index.docker.io
 
+hookforward:
+  cloudant_url: toopy.cloudant.com/jenkins-ping
+  webhook_url: http://jenkins-master.local/github-webhook/
+
 jenkins:
   home: /var/lib/jenkins
   plugins:
