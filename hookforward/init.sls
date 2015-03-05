@@ -1,3 +1,4 @@
+
 {% if grains['oscodename'] != 'jessie' -%}
 include:
   - supervisor.service
@@ -6,8 +7,20 @@ include:
 curl:
   pkg.latest:
 
-nodejs:
-  pkg.installed
+{% if grains['oscodename'] != 'jessie' -%}
+backports_repo:
+  pkgrepo.managed:
+    - name: deb http://ftp.us.debian.org/debian wheezy-backports main
+    - file: /etc/apt/sources.list.d/wheezy-backports.list
+{%- endif %}
+
+nodejs_pkg:
+  pkg.installed:
+    - name: nodejs
+{%- if grains['oscodename'] != 'jessie' %}
+    - require:
+      - pkgrepo: backports_repo
+{%- endif %}
 
 node_link:
   file.symlink:
