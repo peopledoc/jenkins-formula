@@ -5,7 +5,7 @@ include:
 {%- endif %}
 
 curl:
-  pkg.latest:
+  pkg.latest
 
 {% if grains['oscodename'] == 'wheezy' -%}
 backports_repo:
