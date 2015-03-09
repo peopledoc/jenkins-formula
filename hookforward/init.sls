@@ -4,7 +4,7 @@ include:
 {%- endif %}
 
 curl:
-  pkg.latest:
+  pkg.latest
 
 nodejs:
   pkg.installed
