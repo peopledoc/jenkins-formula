@@ -1,3 +1,6 @@
+docker:
+  opts: --insecure-registry index.docker.io
+
 jenkins:
   home: /var/lib/jenkins
   plugins:
