@@ -3,6 +3,9 @@ include:
   - supervisor.service
 {%- endif %}
 
+curl:
+  pkg.latest:
+
 nodejs:
   pkg.installed
 
@@ -11,6 +14,7 @@ node_link:
     - name: /usr/bin/node
     - target: /usr/bin/nodejs
     - require:
+      - pkg: curl
       - pkg: nodejs
 
 npm:
