@@ -63,6 +63,7 @@ jenkins_credentials:
     - defaults:
         user: {{ user }}
         ssh_passphrase: ENCRYPT('')
+        git_passphrase: ENCRYPT('')
 
 jenkins_nodeMonitors:
   file.managed:
