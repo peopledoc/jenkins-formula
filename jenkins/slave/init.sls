@@ -8,6 +8,7 @@
 {% set git_hosts = git.get('hosts', []) -%}
 
 include:
+  - jenkins.user
   - jenkins.cli
 
 jre:
@@ -17,11 +18,6 @@ jre:
 ssh:
   pkg.latest:
     - name: openssh-server
-
-jenkins_user_slave:
-  user.present:
-    - name: jenkins
-    - home: {{ home }}
 
 allow_master_key:
   ssh_auth.present:
