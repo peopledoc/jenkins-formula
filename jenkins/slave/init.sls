@@ -1,12 +1,14 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
+{% set group = jenkins.get('group', user) -%}
 {% set keys = salt['publish.publish']('roles:jenkins-master', 'ssh_key.pub', user, expr_form='grain') %}
 {% set master_key = keys.values()[0] %}
-{% set ssh_credential = jenkins.get('ssh_credential', '0c952d99-54de-44c4-99d8-86f2c3acf170') %}
 
 include:
+  - jenkins.user
   - jenkins.cli
+  - jenkins.git
 
 jre:
   pkg.latest:
@@ -15,11 +17,6 @@ jre:
 ssh:
   pkg.latest:
     - name: openssh-server
-
-jenkins_user_slave:
-  user.present:
-    - name: jenkins
-    - home: {{ home }}
 
 allow_master_key:
   ssh_auth.present:
@@ -31,4 +28,4 @@ node:
     - name: {{ grains['host'] }}
     - host: {{ grains['fqdn'] }}
     - remote_fs: {{ home }}
-    - credential: {{ ssh_credential }}
+    - credential: master-ssh

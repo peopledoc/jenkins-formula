@@ -2,13 +2,13 @@
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
 {% set group = jenkins.get('group', user) -%}
-{% set ssh_credential = jenkins.get('ssh_credential', '0c952d99-54de-44c4-99d8-86f2c3acf170') %}
 
 include:
   - jenkins
   - jenkins.nginx
   - jenkins.cli
   - jenkins.plugins
+  - jenkins.git
   - hookforward
 
 {% if grains['oscodename'] == 'jessie' -%}
@@ -62,7 +62,8 @@ jenkins_credentials:
     - source: salt://jenkins/master/credentials.xml
     - defaults:
         user: {{ user }}
-        credential: {{ ssh_credential }}
+        ssh_passphrase: ENCRYPT('')
+        git_passphrase: ENCRYPT('')
 
 jenkins_nodeMonitors:
   file.managed:
@@ -79,3 +80,10 @@ reload:
       - file: jenkins_config
       - file: jenkins_credentials
       - file: jenkins_nodeMonitors
+
+encrypt_credential:
+  module.run:
+    - name: jenkins.encrypt_credentials
+    - home: {{ home }}
+    - watch:
+      - file: jenkins_credentials
