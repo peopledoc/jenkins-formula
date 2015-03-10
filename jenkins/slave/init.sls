@@ -4,7 +4,6 @@
 {% set group = jenkins.get('group', user) -%}
 {% set keys = salt['publish.publish']('roles:jenkins-master', 'ssh_key.pub', user, expr_form='grain') %}
 {% set master_key = keys.values()[0] %}
-{% set ssh_credential = jenkins.get('ssh_credential', '0c952d99-54de-44c4-99d8-86f2c3acf170') %}
 {% set git = jenkins.get('git', {}) -%}
 {% set git_hosts = git.get('hosts', []) -%}
 
@@ -34,7 +33,7 @@ node:
     - name: {{ grains['host'] }}
     - host: {{ grains['fqdn'] }}
     - remote_fs: {{ home }}
-    - credential: {{ ssh_credential }}
+    - credential: master-ssh
 
 git_key:
   file.managed:

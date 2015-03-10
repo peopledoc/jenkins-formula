@@ -2,7 +2,6 @@
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
 {% set group = jenkins.get('group', user) -%}
-{% set ssh_credential = jenkins.get('ssh_credential', '0c952d99-54de-44c4-99d8-86f2c3acf170') %}
 
 include:
   - jenkins
