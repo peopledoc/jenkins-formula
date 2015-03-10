@@ -8,6 +8,7 @@ include:
   - jenkins.nginx
   - jenkins.cli
   - jenkins.plugins
+  - jenkins.git
   - hookforward
 
 {% if grains['oscodename'] == 'jessie' -%}
