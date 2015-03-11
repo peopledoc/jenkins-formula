@@ -1,10 +1,10 @@
 
 include:
   - docker
-  - jenkins.slave
+  - jenkins.user
 
 extend:
-  jenkins_user_slave:
+  jenkins_user:
     user.present:
       - uid: 1000
       - gid: 1000
