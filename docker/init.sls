@@ -12,13 +12,13 @@ docker_repo:
 
 docker_pkg:
   pkg.installed:
-{% if grains['oscodename'] == 'wheezy' -%}
+{%- if grains['oscodename'] == 'wheezy' %}
     - name: lxc-docker
     - refresh: True
     - repo: docker
     - require:
       - pkgrepo: docker_repo
-{% else %}
+{%- else %}
     - name: docker.io
 {%- endif %}
 
