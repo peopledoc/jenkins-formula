@@ -19,18 +19,7 @@ patch_nginx_conf:
     - char: '# '
 {%- endif %}
 
-service_jenkins:
-  service.enabled:
-    - name: jenkins
-
 extend:
-  jenkins_user:
-    user.present:
-      - home: {{ home }}
-  nginx:
-    service:
-      - require:
-        - file: /etc/nginx/sites-enabled/jenkins.conf
 {%- if grains['oscodename'] == 'jessie' %}
     pkg:
       - require:
