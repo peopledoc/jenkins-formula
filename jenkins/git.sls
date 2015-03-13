@@ -20,6 +20,13 @@ git_key:
     - user: {{ user }}
     - group: {{ group }}
 
+ssh_config_mode:
+  file.managed:
+    - name: {{ home }}/.ssh/config
+    - user: {{ user }}
+    - group: {{ group }}
+    - mode: 0600
+
 {% for host in git_hosts -%}
 git_host_{{ host }}_known:
   ssh_known_hosts.present:

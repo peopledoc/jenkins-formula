@@ -52,6 +52,11 @@ ssh_key:
     - user: {{ user }}
     - creates: {{ home }}/.ssh/id_rsa
 
+ssh_config:
+  file.append:
+    - name: {{ home }}/.ssh/config
+    - source: salt://jenkins/master/ssh_config
+
 jenkins_credentials:
   file.managed:
     - name: {{ home }}/credentials.xml
