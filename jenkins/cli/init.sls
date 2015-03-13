@@ -23,7 +23,7 @@ libdir:
 
 cli_jar:
   cmd.run:
-    - name: wget http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
+    - name: curl -O http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
     - cwd: {{ libdir }}
     - creates: {{ libdir }}/jenkins-cli.jar
     - require:
