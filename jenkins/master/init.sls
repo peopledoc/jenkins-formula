@@ -17,10 +17,9 @@ patch_nginx_conf:
     - name: /etc/nginx/nginx.conf
     - regex: daemon
     - char: '# '
-{%- endif %}
 
 extend:
-{%- if grains['oscodename'] == 'jessie' %}
+  nginx:
     pkg:
       - require:
         - file: patch_nginx_conf
