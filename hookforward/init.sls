@@ -38,7 +38,7 @@ npm:
 
 hookforward:
   cmd.run:
-    - name: npm install -g hookforward
+    - name: hookforward --version || npm install -g hookforward
     - require:
       - cmd: npm
 
