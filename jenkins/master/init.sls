@@ -62,8 +62,6 @@ jenkins_credentials:
     - source: salt://jenkins/master/credentials.xml
     - defaults:
         user: {{ user }}
-        ssh_passphrase: ENCRYPT('')
-        git_passphrase: ENCRYPT('')
 
 jenkins_nodeMonitors:
   file.managed:
@@ -80,10 +78,3 @@ reload:
       - file: jenkins_config
       - file: jenkins_credentials
       - file: jenkins_nodeMonitors
-
-encrypt_credential:
-  module.run:
-    - name: jenkins.encrypt_credentials
-    - home: {{ home }}
-    - watch:
-      - file: jenkins_credentials
