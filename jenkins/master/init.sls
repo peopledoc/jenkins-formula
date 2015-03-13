@@ -19,18 +19,7 @@ patch_nginx_conf:
     - char: '# '
 {%- endif %}
 
-service_jenkins:
-  service.enabled:
-    - name: jenkins
-
 extend:
-  jenkins_user:
-    user.present:
-      - home: {{ home }}
-  nginx:
-    service:
-      - require:
-        - file: /etc/nginx/sites-enabled/jenkins.conf
 {%- if grains['oscodename'] == 'jessie' %}
     pkg:
       - require:
@@ -52,6 +41,11 @@ ssh_key:
     - user: {{ user }}
     - creates: {{ home }}/.ssh/id_rsa
 
+ssh_config:
+  file.append:
+    - name: {{ home }}/.ssh/config
+    - source: salt://jenkins/master/ssh_config
+
 jenkins_credentials:
   file.managed:
     - name: {{ home }}/credentials.xml
@@ -62,8 +56,6 @@ jenkins_credentials:
     - source: salt://jenkins/master/credentials.xml
     - defaults:
         user: {{ user }}
-        ssh_passphrase: ENCRYPT('')
-        git_passphrase: ENCRYPT('')
 
 jenkins_nodeMonitors:
   file.managed:
@@ -80,10 +72,3 @@ reload:
       - file: jenkins_config
       - file: jenkins_credentials
       - file: jenkins_nodeMonitors
-
-encrypt_credential:
-  module.run:
-    - name: jenkins.encrypt_credentials
-    - home: {{ home }}
-    - watch:
-      - file: jenkins_credentials
