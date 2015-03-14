@@ -23,7 +23,7 @@ allow_master_key:
     - name: {{ master_key }}
     - user: {{ user }}
 
-node:
+slave_node:
   jenkins_node.present:
     - name: {{ grains['host'] }}
     - host: {{ grains['fqdn'] }}

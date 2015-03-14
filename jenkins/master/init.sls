@@ -64,7 +64,7 @@ jenkins_nodeMonitors:
     - group: {{ group }}
     - source: salt://jenkins/master/nodeMonitors.xml
 
-reload:
+jenkins_safe_restart:
   # safe-restart is required by nodeMonitors
   jenkins.restart:
     - watch:
