@@ -36,7 +36,7 @@ jenkins_config:
 
 ssh_key:
   cmd.run:
-    - name: echo -e  'y\n' | ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
+    - name: test -f  {{ home }}/.ssh/id_rsa || ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
     - user: {{ user }}
     - creates: {{ home }}/.ssh/id_rsa
 
