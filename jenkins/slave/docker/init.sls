@@ -3,8 +3,10 @@ include:
   - docker
   - jenkins.user
 
-docker_group:
-  group.present:
-    - name: docker
-    - addusers:
-      - jenkins
+extend:
+  jenkins_user:
+    user:
+      - groups:
+        - docker
+      - require:
+        - pkg: docker_pkg
