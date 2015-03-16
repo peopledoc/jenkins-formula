@@ -31,16 +31,12 @@ node_link:
       - pkg: nodejs
 
 npm:
-  cmd.run:
-    - name: curl https://www.npmjs.com/install.sh | sh
-    - require:
-      - file: node_link
+  pkg.installed
 
 hookforward:
-  cmd.run:
-    - name: npm install -g hookforward
+  npm.installed:
     - require:
-      - cmd: npm
+      - pkg: npm
 
 {% if grains['oscodename'] != 'jessie' -%}
 

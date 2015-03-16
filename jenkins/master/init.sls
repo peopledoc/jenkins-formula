@@ -17,10 +17,9 @@ patch_nginx_conf:
     - name: /etc/nginx/nginx.conf
     - regex: daemon
     - char: '# '
-{%- endif %}
 
 extend:
-{%- if grains['oscodename'] == 'jessie' %}
+  nginx:
     pkg:
       - require:
         - file: patch_nginx_conf
@@ -37,7 +36,7 @@ jenkins_config:
 
 ssh_key:
   cmd.run:
-    - name: ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
+    - name: test -f  {{ home }}/.ssh/id_rsa || ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
     - user: {{ user }}
     - creates: {{ home }}/.ssh/id_rsa
 
@@ -65,7 +64,7 @@ jenkins_nodeMonitors:
     - group: {{ group }}
     - source: salt://jenkins/master/nodeMonitors.xml
 
-reload:
+jenkins_safe_restart:
   # safe-restart is required by nodeMonitors
   jenkins.restart:
     - watch:

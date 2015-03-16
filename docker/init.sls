@@ -30,13 +30,12 @@ docker_opts:
         ^.?DOCKER_OPTS=.*
     - repl:
         DOCKER_OPTS="{{ docker_opts }}"\n
-{%- endif %}
+    - require:
+      - pkg: docker_pkg
 
-docker_service:
-  service.running:
-    - name: docker
-    - enable: True
-{%- if docker_opts %}
+docker_restart:
+  cmd.run:
+    - name: service docker restart
     - watch:
       - file: docker_opts
 {%- endif %}

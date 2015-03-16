@@ -5,12 +5,8 @@ include:
 
 extend:
   jenkins_user:
-    user.present:
-      - uid: 1000
-      - gid: 1000
-
-docker_group:
-  group.present:
-    - name: docker
-    - addusers:
-      - jenkins
+    user:
+      - groups:
+        - docker
+      - require:
+        - pkg: docker_pkg
