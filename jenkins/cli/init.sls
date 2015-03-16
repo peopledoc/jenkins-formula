@@ -11,7 +11,7 @@ curl_pkg:
   pkg.latest:
     - name: curl
 
-{%- if 'jenkins-master' in grains['roles'] %}
+{% if 'jenkins-master' in grains['roles'] -%}
 force_jenkins_restart:
   cmd.run:
     - name: service jenkins restart
