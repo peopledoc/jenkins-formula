@@ -4,4 +4,5 @@ include:
 {%- endif %}
 
 remove_hookforward:
-  npm.removed
+  npm.removed:
+    - name: hookforward
