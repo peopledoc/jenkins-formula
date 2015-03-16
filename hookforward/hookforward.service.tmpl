@@ -1,0 +1,8 @@
+[Unit]
+Description=Hookforward
+
+[Service]
+ExecStart=/usr/local/bin/hookforward start https://{{ username }}:{{ password }}@{{ cloudant_url }} {{ webhook_url }}
+
+[Install]
+WantedBy=multi-user.target
