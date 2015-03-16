@@ -11,20 +11,6 @@ include:
   - jenkins.git
   - hookforward
 
-{% if grains['oscodename'] == 'jessie' -%}
-patch_nginx_conf:
-  file.comment:
-    - name: /etc/nginx/nginx.conf
-    - regex: daemon
-    - char: '# '
-
-extend:
-  nginx:
-    pkg:
-      - require:
-        - file: patch_nginx_conf
-{%- endif %}
-
 jenkins_config:
   file.managed:
     - name: {{ home }}/config.xml
