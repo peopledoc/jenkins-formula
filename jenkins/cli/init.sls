@@ -1,11 +1,11 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
+{% set libdir = '/usr/lib/jenkins' -%}
 {% if 'jenkins-master' in grains['roles'] -%}
-{% set master_ip = grains['ipv4'][0] -%}
+{% set master_ip = salt['network.ip_addrs']()[0] -%}
 {% else -%}
 {% set ip_addrs = salt['publish.publish']('roles:jenkins-master', 'network.ip_addrs', expr_form='grain') -%}
 {% set master_ip = ip_addrs.values()[0][0] -%}
 {% endif -%}
-{% set libdir = '/usr/lib/jenkins' -%}
 
 curl_pkg:
   pkg.latest:
@@ -32,7 +32,7 @@ libdir:
 
 cli_jar:
   cmd.run:
-    - name: curl -O http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
+    - name: curl --retry 5 --fail -O http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
     - cwd: {{ libdir }}
     - creates: {{ libdir }}/jenkins-cli.jar
     - require:
