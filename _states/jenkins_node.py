@@ -16,6 +16,9 @@ _create_xml_template = """\
     <host>{host}</host>
     <port>{ssh_port}</port>
     <credentialsId>{cred_id}</credentialsId>
+    <launchTimeoutSeconds>10</launchTimeoutSeconds>
+    <maxNumRetries>0</maxNumRetries>
+    <retryWaitTime>5</retryWaitTime>
   </launcher>
   <label>{labels}</label>
   <nodeProperties/>
