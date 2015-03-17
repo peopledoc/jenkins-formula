@@ -5,6 +5,9 @@
 {% set git = jenkins.get('git', {}) -%}
 {% set git_hosts = git.get('hosts', []) -%}
 
+git:
+  pkg.installed
+
 dotssh_dir:
   file.directory:
     - name: {{ home }}/.ssh
