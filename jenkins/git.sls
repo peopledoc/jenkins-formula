@@ -6,7 +6,8 @@
 {% set git_hosts = git.get('hosts', []) -%}
 
 git:
-  pkg.installed
+  pkg.installed:
+    - reload_modules: True
 
 dotssh_dir:
   file.directory:
