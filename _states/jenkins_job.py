@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
 import difflib
 
 
-def present(name, source, **kwargs):
+def present(name, source, template=None, context=None, **kwargs):
 
     _runcli = __salt__['jenkins.runcli']  # noqa
-    _get_file_str = __salt__['cp.get_file_str']
+    _get_file_str = __salt__['cp.get_file_str']  # noqa
+    _get_template = __salt__['cp.get_template']  # noqa
 
     ret = {
         'name': name,
@@ -15,7 +17,13 @@ def present(name, source, **kwargs):
         'comment': ''
     }
 
-    new = _get_file_str(source)
+    if template:
+        _get_template(source, '/tmp/job.xml', template=template,
+                            context=context, **kwargs)
+        new = open('/tmp/job.xml').read()
+        os.unlink('/tmp/job.xml')
+    else:
+        new = _get_file_str(source)
 
     try:
         current = _runcli('get-job', name)
