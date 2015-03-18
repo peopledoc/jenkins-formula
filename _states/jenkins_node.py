@@ -26,8 +26,10 @@ _create_xml_template = """\
 </slave>"""
 
 
-def present(name, credential, host=None, remote_fs='', ssh_port=22, **kwargs):
+def present(name, credential, host=None, remote_fs='', ssh_port=22,
+            num_executors=None, **kwargs):
     _runcli = __salt__['jenkins.runcli']  # noqa
+    ncpus = __grains__['num_cpus']  # noqa
 
     ret = {
         'name': name,
@@ -40,7 +42,7 @@ def present(name, credential, host=None, remote_fs='', ssh_port=22, **kwargs):
         node_name=name,
         host=host or name,
         node_slave_home=remote_fs,
-        executors=2,
+        executors=num_executors or ncpus + 1,
         ssh_port=ssh_port,
         cred_id=credential,
         user_id='anonymous',
