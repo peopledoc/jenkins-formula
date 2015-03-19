@@ -46,18 +46,21 @@ def _update(name, names=None, skiped=None, updateall=True, **kwargs):
         if short_name in skiped:
             continue
 
-        try:
-            _runcli('install-plugin', short_name)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
+        if not __opts__['test']:  # noqa
+            try:
+                _runcli('install-plugin', short_name)
+            except exc.CommandExecutionError as e:
+                ret['comment'] = e.message
+                return ret
+        else:
+            pass
 
         ret['changes'][short_name] = {
             'old': current,
             'new': update,
         }
 
-    ret['result'] = True
+    ret['result'] = None if __opts__['test'] else True  # noqa
     return ret
 
 
@@ -116,11 +119,14 @@ def installed(name, names=None, **kwargs):
             continue
 
         # install
-        try:
-            _runcli('install-plugin {0}'.format(short_name))
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
+        if not __opts__['test']:  # noqa
+            try:
+                _runcli('install-plugin {0}'.format(short_name))
+            except exc.CommandExecutionError as e:
+                ret['comment'] = e.message
+                return ret
+        else:
+            pass
 
         # fresh install
         ret['changes'][short_name] = {
@@ -128,7 +134,7 @@ def installed(name, names=None, **kwargs):
             'new': True,
         }
 
-    ret['result'] = True
+    ret['result'] = None if __opts__['test'] else True  # noqa
     return ret
 
 
@@ -145,10 +151,12 @@ def _uninstall(short_name):
         # remove
         path = os.path.join(plugin_dir, item)
         if item == short_name and os.path.isdir(path):
-            shutil.rmtree(path)
+            if not __opts__['test']:  # noqa
+                shutil.rmtree(path)
             result.append(path)
         elif item in ['{0}{1}'.format(short_name, ext) for ext in ['.hpi', '.jpi']]:  # noqa
-            os.remove(path)
+            if not __opts__['test']:  # noqa
+                os.remove(path)
             result.append(path)
 
     return result
@@ -182,7 +190,7 @@ def removed(name, names=None):
                 'new': None,
             }
 
-    ret['result'] = True
+    ret['result'] = None if __opts__['test'] else True  # noqa
     return ret
 
 

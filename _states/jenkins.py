@@ -17,6 +17,10 @@ def restart(name, wait_online=True, **kwargs):
         'comment': ''
     }
 
+    if __opts__['test']:  # noqa
+        ret['result'] = None
+        return ret
+
     try:
         __salt__['jenkins.restart'](wait_online=wait_online)  # noqa
     except Exception, e:
