@@ -58,6 +58,7 @@ def present(name, names=None, **kwargs):
         names = [name]
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
     for view in names:
 
         # check exist
@@ -76,7 +77,7 @@ def present(name, names=None, **kwargs):
         })
 
         # update
-        if not __opts__['test']:  # noqa
+        if not test:
             try:
                 _runcli(command, view, input_=new)
             except exc.CommandExecutionError as e:
@@ -91,7 +92,7 @@ def present(name, names=None, **kwargs):
             'new': new,
         }
 
-    ret['result'] = None if __opts__['test'] else True  # noqa
+    ret['result'] = None if test else True
     return ret
 
 
@@ -123,6 +124,7 @@ def job_present(name, names=None, view=None, **kwargs):
         return ret
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
 
     # check exist
     try:
@@ -140,7 +142,7 @@ def job_present(name, names=None, view=None, **kwargs):
     })
 
     # update
-    if not __opts__['test']:  # noqa
+    if not test:
         try:
             _runcli(command, view, input_=new)
         except exc.CommandExecutionError as e:
@@ -155,7 +157,7 @@ def job_present(name, names=None, view=None, **kwargs):
         'new': new,
     }
 
-    ret['result'] = None if __opts__['test'] else True  # noqa
+    ret['result'] = None if test else True
     return ret
 
 
@@ -172,6 +174,7 @@ def absent(name, names=None):
         names = [name]
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
     for view in names:
 
         # check exist
@@ -181,7 +184,7 @@ def absent(name, names=None):
             continue
 
         # update
-        if not __opts__['test']:  # noqa
+        if not test:
             try:
                 _runcli('delete-view', view)
             except exc.CommandExecutionError as e:
@@ -195,7 +198,7 @@ def absent(name, names=None):
             'new': None,
         }
 
-    ret['result'] = None if __opts__['test'] else True  # noqa
+    ret['result'] = None if test else True
     return ret
 
 
@@ -227,6 +230,7 @@ def job_absent(name, names=None, view=None, **kwargs):
         return ret
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
 
     # check exist
     try:
@@ -245,7 +249,7 @@ def job_absent(name, names=None, view=None, **kwargs):
     })
 
     # update
-    if not __opts__['test']:  # noqa
+    if not test:
         try:
             _runcli(command, view, input_=new)
         except exc.CommandExecutionError as e:
@@ -260,6 +264,5 @@ def job_absent(name, names=None, view=None, **kwargs):
         'new': new,
     }
 
-    ret['result'] = None if __opts__['test'] else True  # noqa
+    ret['result'] = None if test else True
     return ret
-

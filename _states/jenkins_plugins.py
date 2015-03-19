@@ -23,6 +23,7 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
     skiped = skiped or []
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
     try:
         stdout = _runcli('list-plugins')
     except exc.CommandExecutionError as e:
@@ -46,7 +47,7 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
         if short_name in skiped:
             continue
 
-        if not __opts__['test']:  # noqa
+        if not test:
             try:
                 _runcli('install-plugin', short_name)
             except exc.CommandExecutionError as e:
@@ -60,7 +61,7 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
             'new': update,
         }
 
-    ret['result'] = None if __opts__['test'] else True  # noqa
+    ret['result'] = None if test else True
     return ret
 
 
@@ -80,7 +81,8 @@ def _info(short_name):
     RE_INSTALL = '(\w.+?)\s.*\s(\d+.*)'
     m = re.match(RE_INSTALL, stdout)
     if not m:
-        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(short_name, stdout)  # noqa
+        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(short_name,
+                                                                 stdout)
 
     __, version = m.groups()
     return IS_INSTALLED, version
@@ -101,6 +103,7 @@ def installed(name, names=None, **kwargs):
         names = [name]
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
     for short_name in names:
 
         # just updated
@@ -119,7 +122,7 @@ def installed(name, names=None, **kwargs):
             continue
 
         # install
-        if not __opts__['test']:  # noqa
+        if not test:
             try:
                 _runcli('install-plugin {0}'.format(short_name))
             except exc.CommandExecutionError as e:
@@ -134,7 +137,7 @@ def installed(name, names=None, **kwargs):
             'new': True,
         }
 
-    ret['result'] = None if __opts__['test'] else True  # noqa
+    ret['result'] = None if test else True
     return ret
 
 
@@ -144,6 +147,9 @@ def _uninstall(short_name):
 
     home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')  # noqa
     plugin_dir = os.path.join(home, 'plugins')
+
+    test = __opts__['test']  # noqa
+
     for item in os.listdir(plugin_dir):
         # next
         if not item.startswith(short_name):
@@ -151,11 +157,11 @@ def _uninstall(short_name):
         # remove
         path = os.path.join(plugin_dir, item)
         if item == short_name and os.path.isdir(path):
-            if not __opts__['test']:  # noqa
+            if not test:
                 shutil.rmtree(path)
             result.append(path)
         elif item in ['{0}{1}'.format(short_name, ext) for ext in ['.hpi', '.jpi']]:  # noqa
-            if not __opts__['test']:  # noqa
+            if not test:
                 os.remove(path)
             result.append(path)
 
