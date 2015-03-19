@@ -33,8 +33,9 @@ ssh_config_mode:
 
 {% for host in git_hosts -%}
 git_host_{{ host }}_known:
-  ssh_known_hosts.present:
-    - name: {{ host }}
+  module.run:
+    - name: ssh.set_known_host
+    - hostname: {{ host }}
     - user: {{ user }}
 
 git_host_{{ host }}_setup:
