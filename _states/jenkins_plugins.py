@@ -6,7 +6,7 @@ import shutil
 import salt.exceptions as exc
 
 
-def _update(name, names=None, skiped=None, updateall=True, **kwargs):
+def _update(name, names=None, skiped=None, updateall=True):  # noqa
 
     ret = {
         'name': name,
@@ -100,7 +100,7 @@ def installed(name, names=None, **kwargs):
     if not names:
         names = [name]
 
-    _runcli = __salt__['jenkins.runcli']
+    _runcli = __salt__['jenkins.runcli']  # noqa
     for short_name in names:
 
         # just updated
@@ -142,7 +142,7 @@ def _uninstall(short_name):
 
     result = []
 
-    home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')
+    home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')  # noqa
     plugin_dir = os.path.join(home, 'plugins')
     for item in os.listdir(plugin_dir):
         # next
