@@ -8,6 +8,7 @@ include:
   - jenkins.nginx
   - jenkins.cli
   - jenkins.plugins
+  - jenkins.views
   - jenkins.git
   - hookforward
 
