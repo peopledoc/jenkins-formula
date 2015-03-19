@@ -6,7 +6,7 @@ import shutil
 import salt.exceptions as exc
 
 
-def _update(name, names=None, skiped=None, updateall=True, **kwargs):
+def _update(name, names=None, skiped=None, updateall=True):  # noqa
 
     ret = {
         'name': name,
@@ -23,6 +23,7 @@ def _update(name, names=None, skiped=None, updateall=True, **kwargs):
     skiped = skiped or []
 
     _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
     try:
         stdout = _runcli('list-plugins')
     except exc.CommandExecutionError as e:
@@ -46,18 +47,21 @@ def _update(name, names=None, skiped=None, updateall=True, **kwargs):
         if short_name in skiped:
             continue
 
-        try:
-            _runcli('install-plugin', short_name)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
+        if not test:
+            try:
+                _runcli('install-plugin', short_name)
+            except exc.CommandExecutionError as e:
+                ret['comment'] = e.message
+                return ret
+        else:
+            pass
 
         ret['changes'][short_name] = {
             'old': current,
             'new': update,
         }
 
-    ret['result'] = True
+    ret['result'] = None if test else True
     return ret
 
 
@@ -77,7 +81,8 @@ def _info(short_name):
     RE_INSTALL = '(\w.+?)\s.*\s(\d+.*)'
     m = re.match(RE_INSTALL, stdout)
     if not m:
-        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(short_name, stdout)  # noqa
+        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(short_name,
+                                                                 stdout)
 
     __, version = m.groups()
     return IS_INSTALLED, version
@@ -97,7 +102,8 @@ def installed(name, names=None, **kwargs):
     if not names:
         names = [name]
 
-    _runcli = __salt__['jenkins.runcli']
+    _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
     for short_name in names:
 
         # just updated
@@ -116,11 +122,14 @@ def installed(name, names=None, **kwargs):
             continue
 
         # install
-        try:
-            _runcli('install-plugin {0}'.format(short_name))
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
+        if not test:
+            try:
+                _runcli('install-plugin {0}'.format(short_name))
+            except exc.CommandExecutionError as e:
+                ret['comment'] = e.message
+                return ret
+        else:
+            pass
 
         # fresh install
         ret['changes'][short_name] = {
@@ -128,7 +137,7 @@ def installed(name, names=None, **kwargs):
             'new': True,
         }
 
-    ret['result'] = True
+    ret['result'] = None if test else True
     return ret
 
 
@@ -136,8 +145,11 @@ def _uninstall(short_name):
 
     result = []
 
-    home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')
+    home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')  # noqa
     plugin_dir = os.path.join(home, 'plugins')
+
+    test = __opts__['test']  # noqa
+
     for item in os.listdir(plugin_dir):
         # next
         if not item.startswith(short_name):
@@ -145,10 +157,12 @@ def _uninstall(short_name):
         # remove
         path = os.path.join(plugin_dir, item)
         if item == short_name and os.path.isdir(path):
-            shutil.rmtree(path)
+            if not test:
+                shutil.rmtree(path)
             result.append(path)
         elif item in ['{0}{1}'.format(short_name, ext) for ext in ['.hpi', '.jpi']]:  # noqa
-            os.remove(path)
+            if not test:
+                os.remove(path)
             result.append(path)
 
     return result
@@ -182,7 +196,7 @@ def removed(name, names=None):
                 'new': None,
             }
 
-    ret['result'] = True
+    ret['result'] = None if __opts__['test'] else True  # noqa
     return ret
 
 
