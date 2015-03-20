@@ -1,12 +1,12 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set views = jenkins.get('views', {}) -%}
-{% set present = views.get('present', []) -%}
+{% set names = views.get('names', []) -%}
 
-{% if present -%}
+{%- if names -%}
 views_uninstall:
   jenkins_views.absent:
     - names:
-{% for name in present %}
+{%- for name in names %}
       - {{ name }}
-{% endfor -%}
-{% endif %}
+{%- endfor %}
+{%- endif %}

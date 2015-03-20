@@ -1,22 +1,19 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set views = jenkins.get('views', {}) -%}
-{% set present = views.get('present', []) -%}
-{% set absent = views.get('absent', []) -%}
+{% set names = views.get('names', []) -%}
+{% set columns = views.get('columns', []) -%}
 
-{%- if absent %}
-views_absent:
-  jenkins_views.absent:
-    - names:
-{%- for name in absent %}
-      - {{ name }}
-{%- endfor %}
-{%- endif %}
-
-{%- if present %}
+{%- if views %}
 views_present:
   jenkins_views.present:
     - names:
-{%- for view in present %}
-      - {{ view }}
+{%- for name in names %}
+      - {{ name }}
 {%- endfor %}
+{%- if columns %}
+    - columns:
+{%- for column in columns %}
+      - {{ column }}
+{%- endfor %}
+{%- endif %}
 {%- endif %}
