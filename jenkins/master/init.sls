@@ -13,13 +13,9 @@ include:
   - hookforward
 
 jenkins_config:
-  file.managed:
-    - name: {{ home }}/config.xml
-    - mode: 0644
-    - user: {{ user }}
-    - group: {{ group }}
-    - template: jinja
-    - source: salt://jenkins/master/config.xml
+  jenkins_config.managed:
+    - name: ./numExecutors
+    - text: 0
 
 ssh_key:
   cmd.run:
@@ -55,6 +51,6 @@ jenkins_safe_restart:
   # safe-restart is required by nodeMonitors
   jenkins.restart:
     - watch:
-      - file: jenkins_config
+      - jenkins_config: jenkins_config
       - file: jenkins_credentials
       - file: jenkins_nodeMonitors
