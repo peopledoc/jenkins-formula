@@ -2,11 +2,10 @@
 {% set libdir = '/usr/lib/jenkins' -%}
 {% if 'jenkins-master' in grains['roles'] -%}
 {% set is_master = True -%}
-{% set master_ip = salt['network.ip_addrs']()[0] -%}
+{% set master_ip = grains['fqdn'] -%}
 {% else -%}
 {% set is_master = False -%}
-{% set ip_addrs = salt['publish.publish']('roles:jenkins-master', 'network.ip_addrs', expr_form='grain') -%}
-{% set master_ip = ip_addrs.values()[0][0] -%}
+{% set master_ip = salt['publish.publish']('roles:jenkins-master', 'grains.get', 'fqdn', expr_form='grain').values()[0] -%}
 {% endif -%}
 
 curl_pkg:
