@@ -6,7 +6,7 @@ import salt.exceptions as exc
 import xml.etree.ElementTree as ET
 
 
-def managed(name, text='', create=False, **kwargs):
+def managed(name, text='', create=False):
     """Manages jenkins config content for a given xpath.
 
     name

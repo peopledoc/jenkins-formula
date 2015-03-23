@@ -23,11 +23,11 @@ _create_xml_template = """\
   <label>{labels}</label>
   <nodeProperties/>
   <userId>{user_id}</userId>
-</slave>"""
+</slave>"""  # noqa
 
 
 def present(name, credential, host=None, remote_fs='', ssh_port=22,
-            num_executors=None, **kwargs):
+            num_executors=None):
     _runcli = __salt__['jenkins.runcli']  # noqa
     ncpus = __grains__['num_cpus']  # noqa
 
