@@ -1,12 +1,24 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set views = jenkins.get('views', {}) -%}
-{% set present = views.get('present', []) -%}
+{% set names = views.get('names', []) -%}
 
-{% if present -%}
-views_uninstall:
+restore_config_views:
+  jenkins_config.managed:
+    - name: primaryView
+    - text: All
+
+restore_config_views_reload:
+  jenkins_config.reloaded:
+    - require:
+      - jenkins_config: restore_config_views
+
+{%- if names %}
+views_absent:
   jenkins_views.absent:
     - names:
-{% for name in present %}
+{%- for name in names %}
       - {{ name }}
-{% endfor -%}
-{% endif %}
+{%- endfor %}
+    - require:
+      - jenkins_config: restore_config_views_reload
+{%- endif %}

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 
+import salt.exceptions as exc
+
 import xml.etree.ElementTree as ET
 
 
@@ -57,6 +59,34 @@ def managed(name, text='', create=False, **kwargs):
     # update config file
     if not test:
         config.write(config_path)
+
+    ret['result'] = None if test else True
+    return ret
+
+
+def reloaded(name):
+
+    ret = {
+        'name': name,
+        'changes': {
+            'old': '',
+            'new': 'done',
+        },
+        'result': False,
+        'comment': ''
+    }
+
+    _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
+
+    if not test:
+        try:
+            _runcli('reload-configuration')
+        except exc.CommandExecutionError as e:
+            ret['comment'] = e.message
+            return ret
+    else:
+        pass
 
     ret['result'] = None if test else True
     return ret

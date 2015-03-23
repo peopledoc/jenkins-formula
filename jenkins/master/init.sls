@@ -12,9 +12,9 @@ include:
   - jenkins.git
   - hookforward
 
-jenkins_config:
+jenkins_config_executors:
   jenkins_config.managed:
-    - name: ./numExecutors
+    - name: numExecutors
     - text: 0
 
 ssh_key:
