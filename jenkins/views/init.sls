@@ -28,5 +28,5 @@ config_views:
 
 config_views_reload:
   jenkins_config.reloaded:
-    - require:
+    - watch:
       - jenkins_config: config_views
