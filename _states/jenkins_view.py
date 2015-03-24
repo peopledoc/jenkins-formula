@@ -33,7 +33,7 @@ def present(name, columns=None):
         List of columns to add in the view.
     """
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     ret = {
@@ -45,7 +45,7 @@ def present(name, columns=None):
 
     # check exist and continue or create
     try:
-        _runcli('get-view', name)
+        runcli('get-view', name)
         ret['comment'] = 'View `{0}` exists.'.format(name)
         return ret
     except exc.CommandExecutionError as e:
@@ -61,7 +61,7 @@ def present(name, columns=None):
     # create
     if not test:
         try:
-            _runcli('create-view', name, input_=new)
+            runcli('create-view', name, input_=new)
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             ret['result'] = False
@@ -81,7 +81,7 @@ def absent(name):
         The name of the view to be present.
     """
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     ret = {
@@ -93,7 +93,7 @@ def absent(name):
 
     # check exist
     try:
-        old = _runcli('get-view', name)
+        old = runcli('get-view', name)
     except exc.CommandExecutionError as e:
         ret['comment'] = 'View `{0}` not found'.format(name)
         return ret
@@ -101,7 +101,7 @@ def absent(name):
     # delete
     if not test:
         try:
-            _runcli('delete-view', name)
+            runcli('delete-view', name)
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             ret['result'] = False
@@ -132,7 +132,7 @@ def job_present(name, job=None, jobs=None):
         List of jobs name to add at once.
     """
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     ret = {
@@ -151,7 +151,7 @@ def job_present(name, job=None, jobs=None):
 
     # check exist
     try:
-        old = _runcli('get-view', name)
+        old = runcli('get-view', name)
     except exc.CommandExecutionError as e:
         ret['comment'] = e.message
         return ret
