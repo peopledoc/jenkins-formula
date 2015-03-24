@@ -51,6 +51,6 @@ jenkins_safe_restart:
   # safe-restart is required by nodeMonitors
   jenkins.restart:
     - watch:
-      - jenkins_config: jenkins_config
+      - jenkins_config: jenkins_config_executors
       - file: jenkins_credentials
       - file: jenkins_nodeMonitors

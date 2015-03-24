@@ -29,6 +29,7 @@ cli_jar:
     - creates: {{ libdir }}/jenkins-cli.jar
     - require:
       - pkg: curl_pkg
+      - file: libdir
 {%- if is_master %}
       - cmd: force_jenkins_restart
 {%- endif %}
