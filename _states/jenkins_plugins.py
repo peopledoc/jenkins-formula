@@ -18,10 +18,11 @@ def _update(name, skiped=None, updateall=True):  # noqa
     update_list = [] if updateall else [name]
     skiped = skiped or []
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
+
     try:
-        stdout = _runcli('list-plugins')
+        stdout = runcli('list-plugins')
     except exc.CommandExecutionError as e:
         ret['comment'] = e.message
         return ret
@@ -45,7 +46,7 @@ def _update(name, skiped=None, updateall=True):  # noqa
 
         if not test:
             try:
-                _runcli('install-plugin', short_name)
+                runcli('install-plugin', name)
             except exc.CommandExecutionError as e:
                 ret['comment'] = e.message
                 return ret
@@ -70,7 +71,7 @@ def _update(name, skiped=None, updateall=True):  # noqa
 def _info(name):
 
     # get info
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     stdout = runcli('list-plugins {0}'.format(name))
 
     # check info
@@ -91,7 +92,7 @@ def installed(name):
     """
     ret = _update(name, updateall=False)
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     # just updated
@@ -112,7 +113,7 @@ def installed(name):
     # install
     if not test:
         try:
-            _runcli('install-plugin {0}'.format(name))
+            runcli('install-plugin {0}'.format(name))
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             return ret
