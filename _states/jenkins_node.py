@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-
 import difflib
+
+import xml.etree.ElementTree as ET
+
+import salt.exceptions as exc
 
 
 _create_xml_template = """\
@@ -26,9 +29,10 @@ _create_xml_template = """\
 </slave>"""  # noqa
 
 
-def present(name, credential, host=None, remote_fs='', ssh_port=22,
-            num_executors=None):
-    _runcli = __salt__['jenkins.runcli']  # noqa
+def present(name, credential, host=None, labels=None, num_executors=None,
+            remote_fs='', ssh_port=22):
+
+    runcli = __salt__['jenkins.runcli']  # noqa
     ncpus = __grains__['num_cpus']  # noqa
 
     ret = {
@@ -46,10 +50,10 @@ def present(name, credential, host=None, remote_fs='', ssh_port=22,
         ssh_port=ssh_port,
         cred_id=credential,
         user_id='anonymous',
-        labels='')
+        labels=' '.join(labels or []))
 
     try:
-        current = _runcli('get-node', name)
+        current = runcli('get-node', name)
     except Exception:
         current = ''
         command = 'create-node'
@@ -63,7 +67,7 @@ def present(name, credential, host=None, remote_fs='', ssh_port=22,
 
     if not __opts__['test']:  # noqa
         try:
-            ret['comment'] = _runcli(command, name, input_=new)
+            ret['comment'] = runcli(command, name, input_=new)
         except Exception, e:
             ret['comment'] = e.message
             return ret
@@ -83,7 +87,7 @@ def present(name, credential, host=None, remote_fs='', ssh_port=22,
 
 
 def absent(name):
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
 
     ret = {
         'name': name,
@@ -93,7 +97,7 @@ def absent(name):
     }
 
     try:
-        _runcli('get-node', name)
+        runcli('get-node', name)
     except Exception:
         ret['comment'] = 'Already removed'
         ret['result'] = True
@@ -101,7 +105,7 @@ def absent(name):
 
     if not __opts__['test']:  # noqa
         try:
-            ret['comment'] = _runcli('delete-node', name)
+            ret['comment'] = runcli('delete-node', name)
         except Exception, e:
             ret['comment'] = e.message
             return ret
@@ -115,3 +119,82 @@ def absent(name):
         'new': 'absent',
     }
     return ret
+
+
+def label_present(name, label):
+    """Ensure jenkins label is present in a given node.
+
+    name
+        The target node.
+
+    label
+        The name of the label to be present.
+    """
+
+    runcli = __salt__['jenkins.runcli']  # noqa
+    update_xml = __salt__['jenkins.update_xml']  # noqa
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    # check exist
+    try:
+        old = runcli('get-node', name)
+    except exc.CommandExecutionError as e:
+        ret['comment'] = e.message
+        return ret
+
+    # parse node xml
+    node_xml = ET.fromstring(old)
+
+    # get merge with previous labels
+    labels = [label] + (node_xml.find('label').text or '').split(' ')
+
+    # parse, clean and update xml
+    node_xml.find('label').text = ' '.join(sorted(set(labels)))
+
+    return update_xml(name, 'node', node_xml, old)
+
+
+def label_absent(name, label):
+    """Ensure jenkins label is absent in a given node.
+
+    name
+        The target node.
+
+    label
+        The name of the label to be absent.
+    """
+
+    runcli = __salt__['jenkins.runcli']  # noqa
+    update_xml = __salt__['jenkins.update_xml']  # noqa
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    # check exist
+    try:
+        old = runcli('get-node', name)
+    except exc.CommandExecutionError as e:
+        ret['comment'] = e.message
+        return ret
+
+    # parse node xml
+    node_xml = ET.fromstring(old)
+
+    # get previous labels except the one that should be absent
+    labels = [l for l in (node_xml.find('label').text or '').split(' ')
+              if l != label]
+
+    # parse, clean and update xml
+    node_xml.find('label').text = ' '.join(sorted(set(labels)))
+
+    return update_xml(name, 'node', node_xml, old)

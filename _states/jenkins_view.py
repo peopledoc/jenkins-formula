@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-import difflib
 import xml.etree.ElementTree as ET
 
 import salt.exceptions as exc
@@ -33,7 +31,7 @@ def present(name, columns=None):
         List of columns to add in the view.
     """
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     ret = {
@@ -45,7 +43,7 @@ def present(name, columns=None):
 
     # check exist and continue or create
     try:
-        _runcli('get-view', name)
+        runcli('get-view', name)
         ret['comment'] = 'View `{0}` exists.'.format(name)
         return ret
     except exc.CommandExecutionError as e:
@@ -61,7 +59,7 @@ def present(name, columns=None):
     # create
     if not test:
         try:
-            _runcli('create-view', name, input_=new)
+            runcli('create-view', name, input_=new)
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             ret['result'] = False
@@ -81,7 +79,7 @@ def absent(name):
         The name of the view to be present.
     """
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     ret = {
@@ -93,7 +91,7 @@ def absent(name):
 
     # check exist
     try:
-        old = _runcli('get-view', name)
+        old = runcli('get-view', name)
     except exc.CommandExecutionError as e:
         ret['comment'] = 'View `{0}` not found'.format(name)
         return ret
@@ -101,7 +99,7 @@ def absent(name):
     # delete
     if not test:
         try:
-            _runcli('delete-view', name)
+            runcli('delete-view', name)
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             ret['result'] = False
@@ -132,8 +130,8 @@ def job_present(name, job=None, jobs=None):
         List of jobs name to add at once.
     """
 
-    _runcli = __salt__['jenkins.runcli']  # noqa
-    test = __opts__['test']  # noqa
+    runcli = __salt__['jenkins.runcli']  # noqa
+    update_xml = __salt__['jenkins.update_xml']  # noqa
 
     ret = {
         'name': name,
@@ -151,7 +149,7 @@ def job_present(name, job=None, jobs=None):
 
     # check exist
     try:
-        old = _runcli('get-view', name)
+        old = runcli('get-view', name)
     except exc.CommandExecutionError as e:
         ret['comment'] = e.message
         return ret
@@ -173,31 +171,4 @@ def job_present(name, job=None, jobs=None):
         job_xml.tail = "\n" + next_indent_level * "  "
         view_xml.find('jobNames').append(job_xml)
 
-    new = """<?xml version="1.0" encoding="UTF-8"?>\n"""
-    new += ET.tostring(view_xml.find('.'))
-    # Follow jenkins-cli convention
-    new = new.replace(" />", "/>")
-
-    if old == new:
-        ret['comment'] = 'No changes'
-        ret['result'] = True
-    else:
-        diff = '\n'.join(difflib.unified_diff(
-            old.splitlines(), new.splitlines()))
-
-        ret['changes'] = {
-            'diff': diff,
-        }
-
-        # update if not testing
-        if test:
-            ret['result'] = None
-        else:
-            try:
-                _runcli('update-view', name, input_=new)
-            except exc.CommandExecutionError as e:
-                ret['comment'] = e.message
-                return ret
-            ret['result'] = True
-
-    return ret
+    return update_xml(name, 'view', view_xml, old)
