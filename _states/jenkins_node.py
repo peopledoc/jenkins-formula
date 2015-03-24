@@ -80,7 +80,7 @@ def present(name, credential, host=None, labels=None, num_executors=None,
         current.splitlines(), new.splitlines()))
 
     ret['comment'] = 'Changed'
-    ret['changes'][name] = {
+    ret['changes'] = {
         'diff': diff,
     }
     return ret
@@ -114,7 +114,7 @@ def absent(name):
     else:
         ret['result'] = None
 
-    ret['changes'][name] = {
+    ret['changes'] = {
         'old': 'present',
         'new': 'absent',
     }
