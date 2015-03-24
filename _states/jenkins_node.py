@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-
 import difflib
+
+import xml.etree.ElementTree as ET
+
+import salt.exceptions as exc
 
 
 _create_xml_template = """\
@@ -114,4 +117,117 @@ def absent(name):
         'old': 'present',
         'new': 'absent',
     }
+    return ret
+
+
+def label_present(name, node):
+    """Ensure jenkins label is present in a given node.
+
+    name
+        The name of the label to be present.
+
+    view
+        The target node.
+    """
+
+    _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    # check exist
+    try:
+        old = _runcli('get-node', node)
+    except exc.CommandExecutionError as e:
+        ret['comment'] = e.message
+        return ret
+
+    # parse node xml
+    node_xml = ET.fromstring(old)
+
+    # get merge with previous labels
+    labels = [name] + (node_xml.find('label').text or '').split(' ')
+
+    # parse, clean and update xml
+    node_xml.find('label').text = ' '.join(sorted(set(labels)))
+
+    # serialize new payload
+    new = ET.tostring(node_xml.find('.'))
+
+    # update if not testing
+    if not test:
+        try:
+            _runcli('update-node', node, input_=new)
+        except exc.CommandExecutionError as e:
+            ret['comment'] = e.message
+            return ret
+
+    ret['changes'] = {
+        'old': old,
+        'new': new,
+    }
+
+    ret['result'] = None if test else True
+    return ret
+
+
+def label_absent(name, node):
+    """Ensure jenkins label is absent in a given node.
+
+    name
+        The name of the label to be absent.
+
+    view
+        The target node.
+    """
+
+    _runcli = __salt__['jenkins.runcli']  # noqa
+    test = __opts__['test']  # noqa
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    # check exist
+    try:
+        old = _runcli('get-node', node)
+    except exc.CommandExecutionError as e:
+        ret['comment'] = e.message
+        return ret
+
+    # parse node xml
+    node_xml = ET.fromstring(old)
+
+    # get previous labels except the one that should be absent
+    labels = [l for l in (node_xml.find('label').text or '').split(' ')
+              if l != name]
+
+    # parse, clean and update xml
+    node_xml.find('label').text = ' '.join(sorted(set(labels)))
+
+    # serialize new payload
+    new = ET.tostring(node_xml.find('.'))
+
+    # update if not testing
+    if not test:
+        try:
+            _runcli('update-node', node, input_=new)
+        except exc.CommandExecutionError as e:
+            ret['comment'] = e.message
+            return ret
+
+    ret['changes'] = {
+        'old': old,
+        'new': new,
+    }
+
+    ret['result'] = None if test else True
     return ret
