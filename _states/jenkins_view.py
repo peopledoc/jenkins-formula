@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+import difflib
 import xml.etree.ElementTree as ET
 
 import salt.exceptions as exc
@@ -9,9 +11,9 @@ view_xml_tmpl = """
   <name>{name}</name>
   <filterExecutors>false</filterExecutors>
   <filterQueue>false</filterQueue>
-  <properties class="hudson.model.View$PropertyList" />
+  <properties class="hudson.model.View$PropertyList"/>
   <jobNames>
-    <comparator class="hudson.util.CaseInsensitiveComparator" />
+    <comparator class="hudson.util.CaseInsensitiveComparator"/>
   </jobNames>
   <jobFilters />
   <columns>
@@ -154,30 +156,48 @@ def job_present(name, job=None, jobs=None):
         ret['comment'] = e.message
         return ret
 
-    jobs = jobs + get_view_jobs(old)
+    jobs = set(jobs + get_view_jobs(old))
 
     # parse, clean and update xml
     view_xml = ET.fromstring(old)
-    view_xml.find('jobNames').clear()
-    for job in sorted(set(jobs)):
+    root = view_xml.find('jobNames')
+    root.clear()
+    # Indentation
+    root.text = "\n    "
+    root.tail = "\n  "
+
+    for i, job in enumerate(sorted(jobs)):
         job_xml = ET.Element('string')
         job_xml.text = job
+        next_indent_level = 2 if i in range(len(jobs) - 1) else 1
+        job_xml.tail = "\n" + next_indent_level * "  "
         view_xml.find('jobNames').append(job_xml)
 
-    new = ET.tostring(view_xml.find('.'))
+    new = """<?xml version="1.0" encoding="UTF-8"?>\n"""
+    new += ET.tostring(view_xml.find('.'))
+    # Follow jenkins-cli convention
+    new = new.replace(" />", "/>")
 
-    # update if not testing
-    if not test:
-        try:
-            _runcli('update-view', name, input_=new)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
+    if old == new:
+        ret['comment'] = 'No changes'
+        ret['result'] = True
+    else:
+        diff = '\n'.join(difflib.unified_diff(
+            old.splitlines(), new.splitlines()))
 
-    ret['changes'] = {
-        'old': old,
-        'new': new,
-    }
+        ret['changes'] = {
+            'diff': diff,
+        }
 
-    ret['result'] = None if test else True
+        # update if not testing
+        if test:
+            ret['result'] = None
+        else:
+            try:
+                _runcli('update-view', name, input_=new)
+            except exc.CommandExecutionError as e:
+                ret['comment'] = e.message
+                return ret
+            ret['result'] = True
+
     return ret
