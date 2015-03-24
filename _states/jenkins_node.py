@@ -132,7 +132,7 @@ def label_present(name, node):
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
-    test = __opts__['test']  # noqa
+    update_xml = __salt__['jenkins.update_xml']  # noqa
 
     ret = {
         'name': name,
@@ -157,24 +157,7 @@ def label_present(name, node):
     # parse, clean and update xml
     node_xml.find('label').text = ' '.join(sorted(set(labels)))
 
-    # serialize new payload
-    new = ET.tostring(node_xml.find('.'))
-
-    # update if not testing
-    if not test:
-        try:
-            _runcli('update-node', node, input_=new)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
-
-    ret['changes'] = {
-        'old': old,
-        'new': new,
-    }
-
-    ret['result'] = None if test else True
-    return ret
+    return update_xml(name, 'node', node_xml, old)
 
 
 def label_absent(name, node):
@@ -188,7 +171,7 @@ def label_absent(name, node):
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
-    test = __opts__['test']  # noqa
+    update_xml = __salt__['jenkins.update_xml']  # noqa
 
     ret = {
         'name': name,
@@ -214,21 +197,4 @@ def label_absent(name, node):
     # parse, clean and update xml
     node_xml.find('label').text = ' '.join(sorted(set(labels)))
 
-    # serialize new payload
-    new = ET.tostring(node_xml.find('.'))
-
-    # update if not testing
-    if not test:
-        try:
-            _runcli('update-node', node, input_=new)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
-
-    ret['changes'] = {
-        'old': old,
-        'new': new,
-    }
-
-    ret['result'] = None if test else True
-    return ret
+    return update_xml(name, 'node', node_xml, old)
