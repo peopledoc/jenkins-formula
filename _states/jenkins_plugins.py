@@ -6,7 +6,7 @@ import shutil
 import salt.exceptions as exc
 
 
-def _update(name, names=None, skiped=None, updateall=True):  # noqa
+def _update(name, skiped=None, updateall=True):  # noqa
 
     ret = {
         'name': name,
@@ -15,11 +15,7 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
         'comment': ''
     }
 
-    if updateall:
-        names = []
-    elif not names:
-        names = [name]
-
+    update_list = [] if updateall else [name]
     skiped = skiped or []
 
     _runcli = __salt__['jenkins.runcli']  # noqa
@@ -39,12 +35,12 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
         if not m:
             continue
 
-        short_name, current, update = m.groups()
+        name, current, update = m.groups()
         # no need to update
-        if names and short_name not in names:
+        if update_list and name not in update_list:
             continue
         # skiped
-        if short_name in skiped:
+        if name in skiped:
             continue
 
         if not test:
@@ -56,7 +52,7 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
         else:
             pass
 
-        ret['changes'][short_name] = {
+        ret['changes'][name] = {
             'old': current,
             'new': update,
         }
@@ -71,77 +67,69 @@ def _update(name, names=None, skiped=None, updateall=True):  # noqa
 ) = range(2)
 
 
-def _info(short_name):
+def _info(name):
 
     # get info
     _runcli = __salt__['jenkins.runcli']  # noqa
-    stdout = _runcli('list-plugins {0}'.format(short_name))
+    stdout = runcli('list-plugins {0}'.format(name))
 
     # check info
     RE_INSTALL = '(\w.+?)\s.*\s(\d+.*)'
     m = re.match(RE_INSTALL, stdout)
     if not m:
-        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(short_name,
-                                                                 stdout)
+        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(name, stdout)
 
     __, version = m.groups()
     return IS_INSTALLED, version
 
 
-def installed(name, names=None, **kwargs):
+def installed(name):
     """Ensures jenkins plugins are present.
 
     name
         The name of one specific plugin to ensure.
-
-    names
-        The names of specifics plugins to ensure.
     """
-    ret = _update(name, names=names, updateall=False)
-
-    if not names:
-        names = [name]
+    ret = _update(name, updateall=False)
 
     _runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
-    for short_name in names:
 
-        # just updated
-        if short_name in ret['changes']:
-            continue
+    # just updated
+    if name in ret['changes']:
+        continue
 
-        # get info before install
+    # get info before install
+    try:
+        status, info = _info(name)
+    except exc.CommandExecutionError as e:
+        ret['comment'] = e.message
+        return ret
+
+    # installed
+    if status == IS_INSTALLED:
+        continue
+
+    # install
+    if not test:
         try:
-            status, info = _info(short_name)
+            _runcli('install-plugin {0}'.format(name))
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             return ret
+    else:
+        pass
 
-        # installed
-        if status == IS_INSTALLED:
-            continue
-
-        # install
-        if not test:
-            try:
-                _runcli('install-plugin {0}'.format(short_name))
-            except exc.CommandExecutionError as e:
-                ret['comment'] = e.message
-                return ret
-        else:
-            pass
-
-        # fresh install
-        ret['changes'][short_name] = {
-            'old': None,
-            'new': True,
-        }
+    # fresh install
+    ret['changes'][name] = {
+        'old': None,
+        'new': True,
+    }
 
     ret['result'] = None if test else True
     return ret
 
 
-def _uninstall(short_name):
+def _uninstall(name):
 
     result = []
 
@@ -152,15 +140,15 @@ def _uninstall(short_name):
 
     for item in os.listdir(plugin_dir):
         # next
-        if not item.startswith(short_name):
+        if not item.startswith(name):
             continue
         # remove
         path = os.path.join(plugin_dir, item)
-        if item == short_name and os.path.isdir(path):
+        if item == name and os.path.isdir(path):
             if not test:
                 shutil.rmtree(path)
             result.append(path)
-        elif item in ['{0}{1}'.format(short_name, ext) for ext in ['.hpi', '.jpi']]:  # noqa
+        elif item in ['{0}{1}'.format(name, ext) for ext in ['.hpi', '.jpi']]:
             if not test:
                 os.remove(path)
             result.append(path)
@@ -168,7 +156,7 @@ def _uninstall(short_name):
     return result
 
 
-def removed(name, names=None):
+def removed(name):
 
     ret = {
         'name': name,
@@ -177,37 +165,29 @@ def removed(name, names=None):
         'comment': ''
     }
 
-    if not names:
-        names = [name]
+    # get info before install
+    try:
+        status, info = _info(name)
+    except exc.CommandExecutionError as e:
+        ret['comment'] = e.message
+        return ret
 
-    for short_name in names:
-
-        # get info before install
-        try:
-            status, info = _info(short_name)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
-
-        # removed
-        if status == IS_INSTALLED and _uninstall(short_name):
-            ret['changes'][short_name] = {
-                'old': info,
-                'new': None,
-            }
+    # removed
+    if status == IS_INSTALLED and _uninstall(name):
+        ret['changes'] = {
+            'old': info,
+            'new': None,
+        }
 
     ret['result'] = None if __opts__['test'] else True  # noqa
     return ret
 
 
-def updated(name, names=None, skiped=None, updateall=True, **kwargs):
+def updated(name, skiped=None, updateall=True):
     """Updates jenkins plugins.
 
     name
         The name of one specific plugin to update
-
-    names
-        The names of specifics plugins to update.
 
     skiped
         The names of plugins to skiped from update.
@@ -216,4 +196,4 @@ def updated(name, names=None, skiped=None, updateall=True, **kwargs):
         Boolean flag if we want to update all the updateable plugins
         (default: True).
     """
-    return _update(name, names=names, skiped=skiped, updateall=updateall)
+    return _update(name, skiped=skiped, updateall=updateall)
