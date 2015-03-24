@@ -53,7 +53,7 @@ def _update(name, skiped=None, updateall=True):  # noqa
         else:
             pass
 
-        ret['changes'][name] = {
+        ret['changes'] = {
             'old': current,
             'new': update,
         }
@@ -121,7 +121,7 @@ def installed(name):
         pass
 
     # fresh install
-    ret['changes'][name] = {
+    ret['changes'] = {
         'old': None,
         'new': True,
     }
