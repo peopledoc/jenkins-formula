@@ -121,14 +121,14 @@ def absent(name):
     return ret
 
 
-def label_present(name, node):
+def label_present(name, label):
     """Ensure jenkins label is present in a given node.
 
     name
-        The name of the label to be present.
-
-    view
         The target node.
+
+    label
+        The name of the label to be present.
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
@@ -152,7 +152,7 @@ def label_present(name, node):
     node_xml = ET.fromstring(old)
 
     # get merge with previous labels
-    labels = [name] + (node_xml.find('label').text or '').split(' ')
+    labels = [label] + (node_xml.find('label').text or '').split(' ')
 
     # parse, clean and update xml
     node_xml.find('label').text = ' '.join(sorted(set(labels)))
@@ -160,14 +160,14 @@ def label_present(name, node):
     return update_xml(name, 'node', node_xml, old)
 
 
-def label_absent(name, node):
+def label_absent(name, label):
     """Ensure jenkins label is absent in a given node.
 
     name
-        The name of the label to be absent.
-
-    view
         The target node.
+
+    label
+        The name of the label to be absent.
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
@@ -192,7 +192,7 @@ def label_absent(name, node):
 
     # get previous labels except the one that should be absent
     labels = [l for l in (node_xml.find('label').text or '').split(' ')
-              if l != name]
+              if l != label]
 
     # parse, clean and update xml
     node_xml.find('label').text = ' '.join(sorted(set(labels)))
