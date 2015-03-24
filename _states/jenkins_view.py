@@ -117,14 +117,14 @@ def get_view_jobs(view_str):
     return [e.text for e in ET.fromstring(view_str).find('jobNames').findall('string')]  # noqa
 
 
-def job_present(name, view):
+def job_present(name, job):
     """Ensure jenkins job is present in a given view.
 
     name
-        The name of the job to be present.
+        The view.
 
-    view
-        The target view.
+    job
+        The job to add to the view
     """
 
     _runcli = __salt__['jenkins.runcli']  # noqa
@@ -139,12 +139,12 @@ def job_present(name, view):
 
     # check exist
     try:
-        old = _runcli('get-view', view)
+        old = _runcli('get-view', name)
     except exc.CommandExecutionError as e:
         ret['comment'] = e.message
         return ret
 
-    jobs = [name] + get_view_jobs(old)
+    jobs = [job] + get_view_jobs(old)
 
     # parse, clean and update xml
     view_xml = ET.fromstring(old)
@@ -159,12 +159,12 @@ def job_present(name, view):
     # update if not testing
     if not test:
         try:
-            _runcli('update-view', view, input_=new)
+            _runcli('update-view', name, input_=new)
         except exc.CommandExecutionError as e:
             ret['comment'] = e.message
             return ret
 
-    ret['changes'][view] = {
+    ret['changes'] = {
         'old': old,
         'new': new,
     }
