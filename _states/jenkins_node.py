@@ -29,8 +29,9 @@ _create_xml_template = """\
 </slave>"""  # noqa
 
 
-def present(name, credential, host=None, remote_fs='', ssh_port=22,
-            num_executors=None):
+def present(name, credential, host=None, labels=None, num_executors=None,
+            remote_fs='', ssh_port=22):
+
     runcli = __salt__['jenkins.runcli']  # noqa
     ncpus = __grains__['num_cpus']  # noqa
 
@@ -49,7 +50,7 @@ def present(name, credential, host=None, remote_fs='', ssh_port=22,
         ssh_port=ssh_port,
         cred_id=credential,
         user_id='anonymous',
-        labels='')
+        labels=' '.join(labels or []))
 
     try:
         current = runcli('get-node', name)

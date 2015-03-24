@@ -4,6 +4,7 @@
 {% set group = jenkins.get('group', user) -%}
 {% set keys = salt['publish.publish']('roles:jenkins-master', 'ssh_key.pub', user, expr_form='grain') %}
 {% set master_key = keys.values()[0] %}
+{% set labels = grains.get('jenkins', {}).get('labels', []) -%}
 
 include:
   - jenkins.user
@@ -29,3 +30,9 @@ slave_node:
     - host: {{ grains['fqdn'] }}
     - remote_fs: {{ home }}
     - credential: master-ssh
+{%- if labels %}
+    - labels:
+{%- for label in labels %}
+      - {{ label }}
+{%- endfor %}
+{%- endif %}
