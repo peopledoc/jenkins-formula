@@ -6,7 +6,7 @@
 
 {%- if views %}
 views_present:
-  jenkins_views.present:
+  jenkins_view.present:
     - names:
 {%- for name in names %}
       - {{ name }}
@@ -24,7 +24,7 @@ config_views:
     - name: primaryView
     - text: {{ default }}
     - require:
-      - jenkins_views: views_present
+      - jenkins_view: views_present
 
 config_views_reload:
   jenkins_config.reloaded:
