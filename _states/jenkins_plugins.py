@@ -53,7 +53,7 @@ def _update(name, skiped=None, updateall=True):  # noqa
         else:
             pass
 
-        ret['changes'] = {
+        ret['changes'][name] = {
             'old': current,
             'new': update,
         }
@@ -96,8 +96,8 @@ def installed(name):
     test = __opts__['test']  # noqa
 
     # just updated
-    if name in ret['changes']:
-        continue
+    if ret['result']:
+        return ret
 
     # get info before install
     try:
@@ -108,7 +108,8 @@ def installed(name):
 
     # installed
     if status == IS_INSTALLED:
-        continue
+        ret['result'] = None if test else True
+        return ret
 
     # install
     if not test:
