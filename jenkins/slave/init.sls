@@ -27,7 +27,7 @@ allow_master_key:
 slave_node:
   jenkins_node.present:
     - name: {{ grains['host'] }}
-    - host: {{ grains['fqdn'] }}
+    - host: {{ salt['network.ip_addrs']()[0] }}
     - remote_fs: {{ home }}
     - credential: master-ssh
 {%- if labels %}
