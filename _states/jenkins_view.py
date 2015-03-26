@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import xml.etree.ElementTree as ET
 
 import salt.exceptions as exc
@@ -32,44 +33,28 @@ def present(name, columns=None):
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
-    test = __opts__['test']  # noqa
+    update_or_create_xml = __salt__['jenkins.update_or_create_xml']  # noqa
 
-    ret = {
-        'name': name,
-        'changes': {},
-        'result': None if test else True,
-        'comment': ''
-    }
-
-    # check exist and continue or create
     try:
-        runcli('get-view', name)
-        ret['comment'] = 'View `{0}` exists.'.format(name)
-        return ret
-    except exc.CommandExecutionError as e:
-        pass
+        old = view_xml = runcli('get-view', name)
+    except exc.CommandExecutionError:
+        old = None
+        view_xml = view_xml_tmpl.format(name=name)
 
-    # set columns
-    view_xml = ET.fromstring(view_xml_tmpl.format(**{'name': name}))
-    for c in columns or []:
-        view_xml.find('columns').append(ET.Element(c))
+    view_xml = ET.fromstring(view_xml)
+    root = view_xml.find('columns')
+    root.clear()
+    # Indentation
+    root.text = "\n    "
+    root.tail = "\n  "
 
-    new = ET.tostring(view_xml.find('.'))
+    for i, c in enumerate(columns or []):
+        element = ET.Element(c)
+        next_indent_level = 2 if i in range(len(columns) - 1) else 1
+        element.tail = "\n" + next_indent_level * "  "
+        root.append(element)
 
-    # create
-    if not test:
-        try:
-            runcli('create-view', name, input_=new)
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            ret['result'] = False
-            return ret
-
-    ret['changes'] = {
-        'old': None,
-        'new': new,
-    }
-    return ret
+    return update_or_create_xml(name, view_xml, old=old, object_='view')
 
 
 def absent(name):
@@ -131,7 +116,7 @@ def job_present(name, job=None, jobs=None):
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
-    update_xml = __salt__['jenkins.update_xml']  # noqa
+    update_or_create_xml = __salt__['jenkins.update_or_create_xml']  # noqa
 
     ret = {
         'name': name,
@@ -171,4 +156,4 @@ def job_present(name, job=None, jobs=None):
         job_xml.tail = "\n" + next_indent_level * "  "
         view_xml.find('jobNames').append(job_xml)
 
-    return update_xml(name, 'view', view_xml, old)
+    return update_or_create_xml(name, xml=view_xml, old=old, object_='view')

@@ -1,63 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import os
-import difflib
 
 
 def present(name, source, template=None, context=None):
-
-    _runcli = __salt__['jenkins.runcli']  # noqa
-    _get_file_str = __salt__['cp.get_file_str']  # noqa
-    _get_template = __salt__['cp.get_template']  # noqa
-    test = __opts__['test']  # noqa
-
-    ret = {
-        'name': name,
-        'changes': {},
-        'result': None if test else True,
-        'comment': ''
-    }
+    update_or_create_xml = __salt__['jenkins.update_or_create_xml']  # noqa
+    get_file_str = __salt__['cp.get_file_str']  # noqa
+    get_template = __salt__['cp.get_template']  # noqa
 
     if template:
-        _get_template(source, '/tmp/job.xml', template=template,
-                      context=context)
-        new = open('/tmp/job.xml').read()
+        get_template(source, '/tmp/job.xml', template=template,
+                     context=context)
+        new = open('/tmp/job.xml').read().strip()
         os.unlink('/tmp/job.xml')
     else:
-        new = _get_file_str(source)
+        new = get_file_str(source)
 
-    try:
-        current = _runcli('get-job', name)
-    except Exception:
-        current = ''
-        command = 'create-job'
-    else:
-        command = 'update-job'
-
-    if new == current:
-        ret['comment'] = 'Job not changed.'
-        return ret
-
-    if not test:
-        try:
-            ret['comment'] = _runcli(command, name, input_=new)
-        except Exception, e:
-            ret['comment'] = e.message
-            ret['result'] = False
-            return ret
-
-    diff = '\n'.join(difflib.unified_diff(
-        current.splitlines(), new.splitlines()))
-
-    ret['comment'] = 'Changed'
-    ret['changes'] = {
-        'diff': diff,
-    }
-    return ret
+    return update_or_create_xml(name, new, object_='job')
 
 
 def absent(name):
-
     _runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
