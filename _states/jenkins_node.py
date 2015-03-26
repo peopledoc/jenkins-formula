@@ -132,7 +132,7 @@ def label_present(name, label):
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
-    update_xml = __salt__['jenkins.update_xml']  # noqa
+    update_or_create_xml = __salt__['jenkins.update_or_create_xml']  # noqa
 
     ret = {
         'name': name,
@@ -157,7 +157,7 @@ def label_present(name, label):
     # parse, clean and update xml
     node_xml.find('label').text = ' '.join(sorted(set(labels)))
 
-    return update_xml(name, 'node', node_xml, old)
+    return update_or_create_xml(name, node_xml, old, object_='node')
 
 
 def label_absent(name, label):
@@ -171,7 +171,7 @@ def label_absent(name, label):
     """
 
     runcli = __salt__['jenkins.runcli']  # noqa
-    update_xml = __salt__['jenkins.update_xml']  # noqa
+    update_or_create_xml = __salt__['jenkins.update_or_create_xml']  # noqa
 
     ret = {
         'name': name,
@@ -197,4 +197,4 @@ def label_absent(name, label):
     # parse, clean and update xml
     node_xml.find('label').text = ' '.join(sorted(set(labels)))
 
-    return update_xml(name, 'node', node_xml, old)
+    return update_or_create_xml(name, node_xml, old, object_='node')

@@ -44,22 +44,10 @@ def restart(wait_online=True):
     if wait_online:
         runcli('wait-master-online')
 
-def update_xml(name, action, xml, old):
-    """Updates old xml payload with new one for a given action, ex: view, ...
 
-    name
-        The result name.
-
-    action
-        The update action name, ex: view, node, etc.
-
-    xml
-        The xml payload to update or not if not changed.
-
-    old
-        The old xml payload to compare with.
-    """
-
+def update_or_create_xml(name, xml, old=None,
+                         object_=None, get=None, create=None, update=None):
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
     ret = {
@@ -69,23 +57,40 @@ def update_xml(name, action, xml, old):
         'comment': ''
     }
 
-    # serialize new payload
+    get = get or 'get-%s' % object_
+
+    if type(xml) in (str, unicode):
+        xml = ET.fromstring(xml)
+
     new = """<?xml version="1.0" encoding="UTF-8"?>\n"""
-    new += ET.tostring(xml.find('.'))
+    new += ET.tostring(xml.find('.'), encoding='utf-8')
     # Follow jenkins-cli convention
     new = new.replace(" />", "/>")
 
-    if old == new:
-        ret['comment'] = 'No changes'
+    try:
+        if old is None:
+            old = runcli(get, name)
+        # Jenkins sometimes returns \n after <?xml
+        old = old.replace("?><", "?>\n<")
+    except Exception:
+        old = ''
+        command = create or 'create-%s' % object_
+    else:
+        command = update or 'update-%s' % object_
+
+    if new == old:
+        ret['comment'] = 'Not changed.'
         ret['result'] = True
         return ret
 
-    diff = '\n'.join(difflib.unified_diff(
-        old.splitlines(), new.splitlines()))
-
-    ret['changes'] = {
-        'diff': diff,
-    }
+    diff = difflib.unified_diff(old.splitlines(True), new.splitlines(True),
+                                fromfile='old', tofile='new')
+    diff = list(diff)
+    last_line = diff[-1]
+    if not last_line.endswith('\n'):
+        last_line += '\n\ No newline at end of file\n'
+    diff[-1] = last_line
+    ret['changes']['diff'] = ''.join(diff)
 
     if test:
         ret['result'] = None
@@ -93,7 +98,7 @@ def update_xml(name, action, xml, old):
 
     # update if not testing
     try:
-        runcli('update-{0}'.format(action), name, input_=new)
+        runcli(command, name, input_=new)
     except exc.CommandExecutionError as e:
         ret['comment'] = e.message
         return ret
