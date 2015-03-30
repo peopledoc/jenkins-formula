@@ -15,7 +15,7 @@ jenkins:
   plugins:
     installed:
       - github
-    skiped:
+    skipped:
       - matrix-project
 
 nginx:
