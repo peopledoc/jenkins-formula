@@ -6,7 +6,7 @@ import shutil
 import salt.exceptions as exc
 
 
-def _update(name, skiped=None, updateall=True):  # noqa
+def _update(name, skipped=None, updateall=True):  # noqa
 
     ret = {
         'name': name,
@@ -16,7 +16,7 @@ def _update(name, skiped=None, updateall=True):  # noqa
     }
 
     update_list = [] if updateall else [name]
-    skiped = skiped or []
+    skipped = skipped or []
 
     runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
@@ -40,8 +40,8 @@ def _update(name, skiped=None, updateall=True):  # noqa
         # no need to update
         if update_list and name not in update_list:
             continue
-        # skiped
-        if name in skiped:
+        # skipped
+        if name in skipped:
             continue
 
         if not test:
@@ -185,14 +185,14 @@ def removed(name):
     return ret
 
 
-def updated(name, skiped=None, updateall=True):
+def updated(name, skipped=None, updateall=True):
     """Updates jenkins plugins.
 
     name
         The name of one specific plugin to update
 
-    skiped
-        The names of plugins to skiped from update.
+    skipped
+        The names of plugins to skipped from update.
 
     updateall
         Boolean flag if we want to update all the updateable plugins
@@ -200,7 +200,7 @@ def updated(name, skiped=None, updateall=True):
     """
     test = __opts__['test']  # noqa
 
-    ret = _update(name, skiped=skiped, updateall=updateall)
+    ret = _update(name, skipped=skipped, updateall=updateall)
 
     ret['result'] = None if test else True
     return ret
