@@ -1,3 +1,5 @@
+# -*- yaml -*-
+
 docker:
   opts: --insecure-registry index.docker.io
 
@@ -7,6 +9,9 @@ hookforward:
 
 jenkins:
   home: /var/lib/jenkins
+  git:
+    hosts:
+      - github.com
   plugins:
     installed:
       - github

@@ -32,6 +32,20 @@ def runcli(*args, **kwargs):
     return p.stdout.read()
 
 
+def formatdiff(old, new):
+    diff = difflib.unified_diff(old.splitlines(True), new.splitlines(True),
+                                fromfile='old', tofile='new')
+    diff = list(diff)
+    if not diff:
+        return 'No changes'
+
+    last_line = diff[-1]
+    if not last_line.endswith('\n'):
+        last_line += '\n\ No newline at end of file\n'
+    diff[-1] = last_line
+    return ''.join(diff)
+
+
 def restart(wait_online=True):
     """Restarts jenkins and returns stderr or None.
 
@@ -83,14 +97,7 @@ def update_or_create_xml(name, xml, old=None,
         ret['result'] = True
         return ret
 
-    diff = difflib.unified_diff(old.splitlines(True), new.splitlines(True),
-                                fromfile='old', tofile='new')
-    diff = list(diff)
-    last_line = diff[-1]
-    if not last_line.endswith('\n'):
-        last_line += '\n\ No newline at end of file\n'
-    diff[-1] = last_line
-    ret['changes']['diff'] = ''.join(diff)
+    ret['changes']['diff'] = formatdiff(old, new)
 
     if test:
         ret['result'] = None
