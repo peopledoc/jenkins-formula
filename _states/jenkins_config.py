@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
+import xml.etree.ElementTree as ET
 
 import salt.exceptions as exc
-
-import xml.etree.ElementTree as ET
 
 
 def managed(name, text='', create=False):
@@ -26,13 +25,13 @@ def managed(name, text='', create=False):
         'comment': ''
     }
 
+    formatdiff = __salt__['jenkins.formatdiff']  # noqa
     # load config
     home = __pillar__['jenkins'].get('home', '/var/lib/jenkins')  # noqa
     test = __opts__['test']  # noqa
 
     config_path = os.path.join(home, 'config.xml')
 
-    # check path exist
     if not os.path.exists(config_path):
         ret['comment'] = 'Path `{0}` not found.'.format(config_path)
         return ret
@@ -44,19 +43,12 @@ def managed(name, text='', create=False):
         ret['comment'] = '`{0}` not found.'.format(name)
         return ret
 
-    # keep old
     old = ET.tostring(config.find('.'))
-
-    # set content
     config.find(name).text = str(text)
-
-    # update result
     ret['changes'] = {
-        'old': old,
-        'new': ET.tostring(config.find('.')),
+        'diff': formatdiff(old, new=ET.tostring(config.find('.'))),
     }
 
-    # update config file
     if not test:
         config.write(config_path)
 
