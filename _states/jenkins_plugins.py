@@ -58,7 +58,6 @@ def _update(name, skiped=None, updateall=True):  # noqa
             'new': update,
         }
 
-    ret['result'] = None if test else True
     return ret
 
 
@@ -96,7 +95,8 @@ def installed(name):
     test = __opts__['test']  # noqa
 
     # just updated
-    if ret['result']:
+    if name in ret['changes']:
+        ret['result'] = None if test else True
         return ret
 
     # get info before install
@@ -198,4 +198,9 @@ def updated(name, skiped=None, updateall=True):
         Boolean flag if we want to update all the updateable plugins
         (default: True).
     """
-    return _update(name, skiped=skiped, updateall=updateall)
+    test = __opts__['test']  # noqa
+
+    ret = _update(name, skiped=skiped, updateall=updateall)
+
+    ret['result'] = None if test else True
+    return ret
