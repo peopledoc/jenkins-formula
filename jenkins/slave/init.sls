@@ -6,6 +6,7 @@
 {% set master_key = keys.values()[0] %}
 {% set labels = grains.get('jenkins', {}).get('labels', []) -%}
 {% set node = grains.get('jenkins', {}).get('name', grains['nodename']) -%}
+{% set num_executors = grains.get('jenkins', {}).get('executors', grains['num_cpus']) -%}
 
 include:
   - jenkins.user
@@ -30,6 +31,7 @@ slave_node:
     - name: {{ node }}
     - host: {{ salt['network.ip_addrs']()[0] }}
     - remote_fs: {{ home }}
+    - num_executors: {{ num_executors }}
     - credential: master-ssh
 {%- if labels %}
     - labels:
