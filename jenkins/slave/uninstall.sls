@@ -1,5 +1,6 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
+{% set node = grains.get('jenkins', {}).get('name', grains['nodname']) -%}
 
 include:
   - jenkins.user.uninstall
@@ -7,7 +8,7 @@ include:
 
 remove_node:
   jenkins_node.absent:
-    - name: {{ grains['host'] }}
+    - name: {{ node }}
     # Execute CLI before CLI is uninstalled
     - order: 1
 
