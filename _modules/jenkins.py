@@ -74,7 +74,13 @@ def update_or_create_xml(name, xml, old=None,
     get = get or 'get-%s' % object_
 
     if type(xml) in (str, unicode):
-        xml = ET.fromstring(xml)
+        try:
+            xml = ET.fromstring(xml)
+        except Exception as e:
+            ret['comment'] = str(e.message)
+            ret['comment'] += '\n'
+            ret['comment'] += xml
+            return ret
 
     new = """<?xml version="1.0" encoding="UTF-8"?>\n"""
     new += ET.tostring(xml.find('.'), encoding='utf-8')
