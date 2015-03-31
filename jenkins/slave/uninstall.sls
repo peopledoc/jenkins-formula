@@ -1,6 +1,6 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
-{% set node = grains.get('jenkins', {}).get('name', grains['host']) -%}
+{% set node = grains.get('jenkins', {}).get('name', grains['nodname']) -%}
 
 include:
   - jenkins.user.uninstall

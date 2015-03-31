@@ -5,7 +5,7 @@
 {% set keys = salt['publish.publish']('roles:jenkins-master', 'ssh_key.pub', user, expr_form='grain') %}
 {% set master_key = keys.values()[0] %}
 {% set labels = grains.get('jenkins', {}).get('labels', []) -%}
-{% set node = grains.get('jenkins', {}).get('name', grains['host']) -%}
+{% set node = grains.get('jenkins', {}).get('name', grains['nodename']) -%}
 
 include:
   - jenkins.user
