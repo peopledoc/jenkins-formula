@@ -2,8 +2,6 @@
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
 {% set group = jenkins.get('group', user) -%}
-{% set ports = jenkins.get('ports', {}) -%}
-{% set slave_agent_port = ports.get('slave_agent') -%}
 
 include:
   - jenkins.systemd
@@ -12,20 +10,9 @@ include:
   - jenkins.cli
   - jenkins.plugins
   - jenkins.views
+  - jenkins.master.config
   - jenkins.git
   - hookforward
-
-jenkins_config_executors:
-  jenkins_config.managed:
-    - name: numExecutors
-    - text: 0
-
-{% if slave_agent_port -%}
-jenkins_config_slave_port:
-  jenkins_config.managed:
-    - name: slaveAgentPort
-    - text: {{ slave_agent_port }}
-{%- endif %}
 
 ssh_key:
   cmd.run:
