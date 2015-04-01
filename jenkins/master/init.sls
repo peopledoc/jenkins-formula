@@ -2,6 +2,7 @@
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
 {% set group = jenkins.get('group', user) -%}
+{% set slave_agent_port = salt['pillar.get']('jenkins:ports:slave_agent') -%}
 
 include:
   - jenkins.systemd
