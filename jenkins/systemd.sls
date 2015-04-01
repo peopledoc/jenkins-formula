@@ -1,6 +1,7 @@
 {# Defaults to 50% of all CPU available -#}
 {% set default_cpuquota = '%s%%' % (50.0 * grains['num_cpus']) -%}
 {% set cpuquota = salt['grains.get']('jenkins:cpuquota', default_cpuquota) -%}
+{% set blockioweight = salt['grains.get']('jenkins:blockioweight', 800) -%}
 
 stop_sysv:
   cmd.run:
@@ -14,7 +15,7 @@ service_unit:
     - mode: 0644
     - template: jinja
     - defaults:
-        blockioweight: 500
+        blockioweight: {{ blockioweight }}
         cpuquota: {{ cpuquota }}
 
 daemon_reload:
