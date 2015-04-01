@@ -45,9 +45,9 @@ def managed(name, text='', create=False):
 
     old = ET.tostring(config.find('.'))
     config.find(name).text = str(text)
-    ret['changes'] = {
-        'diff': formatdiff(old, new=ET.tostring(config.find('.'))),
-    }
+    diff = formatdiff(old, new=ET.tostring(config.find('.')))
+    if diff:
+        ret['changes']['diff'] = diff
 
     if not test:
         config.write(config_path)
