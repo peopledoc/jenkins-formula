@@ -6,6 +6,7 @@
 {% set slave_agent_port = ports.get('slave_agent') -%}
 
 include:
+  - jenkins.systemd
   - jenkins
   - jenkins.nginx
   - jenkins.cli
