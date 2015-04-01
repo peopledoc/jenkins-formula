@@ -37,7 +37,7 @@ def formatdiff(old, new):
                                 fromfile='old', tofile='new')
     diff = list(diff)
     if not diff:
-        return 'No changes'
+        return
 
     last_line = diff[-1]
     if not last_line.endswith('\n'):
