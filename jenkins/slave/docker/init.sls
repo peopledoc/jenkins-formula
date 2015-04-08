@@ -9,4 +9,4 @@ extend:
       - groups:
         - docker
       - require:
-        - pkg: docker_pkg
+        - service: docker-service
