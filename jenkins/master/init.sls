@@ -3,6 +3,7 @@
 {% set user = jenkins.get('user', 'jenkins') -%}
 {% set group = jenkins.get('group', user) -%}
 {% set slave_agent_port = salt['pillar.get']('jenkins:ports:slave_agent') -%}
+{% set shell = jenkins.get('shell', '/bin/bash') -%}
 
 include:
   - jenkins.systemd
@@ -44,6 +45,17 @@ jenkins_nodeMonitors:
     - user: {{ user }}
     - group: {{ group }}
     - source: salt://jenkins/master/nodeMonitors.xml
+
+jenkins_Shell:
+  file.managed:
+    - name: {{ home }}/hudson.tasks.Shell.xml
+    - mode: 0644
+    - user: {{ user }}
+    - group: {{ group }}
+    - template: jinja
+    - source: salt://jenkins/master/hudson.tasks.Shell.xml
+    - context:
+      shell: {{ shell }}
 
 jenkins_safe_restart:
   # safe-restart is required by nodeMonitors
