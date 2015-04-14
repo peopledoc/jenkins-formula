@@ -7,6 +7,10 @@
 {% set labels = grains.get('jenkins', {}).get('labels', []) -%}
 {% set node = grains.get('jenkins', {}).get('name', grains['nodename']) -%}
 {% set num_executors = grains.get('jenkins', {}).get('executors', grains['num_cpus']) -%}
+{# Calculate subnet: First master, first IP after 127, trim last byte, add CIDR #}
+{% set masters_ip = salt['publish.publish']('roles:jenkins-master', 'grains.get', 'ipv4', expr_form='grain') -%}
+{% set netmask = masters_ip.values()[0][1].rsplit('.', 1)[0] + '.0/24' -%}
+{% set host = salt['network.ip_addrs'](cidr=netmask)[0] -%}
 
 include:
   - jenkins.user
@@ -29,7 +33,7 @@ allow_master_key:
 slave_node:
   jenkins_node.present:
     - name: {{ node }}
-    - host: {{ salt['network.ip_addrs']()[0] }}
+    - host: {{ host }}
     - remote_fs: {{ home }}
     - num_executors: {{ num_executors }}
     - credential: master-ssh
