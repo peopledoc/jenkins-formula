@@ -7,6 +7,7 @@ ExecStart=/usr/local/bin/hookforward start https://{{ cloudant_url }} {{ webhook
 {%- else %}
 ExecStart=/usr/local/bin/hookforward start https://{{ username }}:{{ password }}@{{ cloudant_url }} {{ webhook_url }}
 {%- endif %}
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
