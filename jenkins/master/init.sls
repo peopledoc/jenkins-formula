@@ -12,7 +12,9 @@ include:
   - jenkins.views
   - jenkins.master.config
   - jenkins.git
+{%- if pillar.get('hookforward', None) %}
   - hookforward
+{%- endif %}
 
 ssh_key:
   cmd.run:
