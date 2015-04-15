@@ -17,7 +17,6 @@ views_present:
       - {{ column }}
 {%- endfor %}
 {%- endif %}
-{%- endif %}
 
 config_views:
   jenkins_config.managed:
@@ -30,3 +29,4 @@ config_views_reload:
   jenkins_config.reloaded:
     - watch:
       - jenkins_config: config_views
+{%- endif %}
