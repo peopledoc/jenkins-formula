@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import difflib
 import logging
 import subprocess
@@ -13,6 +14,9 @@ log = logging.getLogger(__name__)
 
 def runcli(*args, **kwargs):
     args = ('/usr/local/sbin/jenkins-cli',) + args
+
+    if not os.path.exists(args[0]):
+        raise exc.CommandExecutionError('jenkins-cli is not installed')
 
     p = subprocess.Popen(
         args,

@@ -32,11 +32,13 @@ ssh_config_mode:
     - mode: 0600
 
 {% for host in git_hosts -%}
+{% if not salt['ssh.get_known_host'](user, host) -%}
 git_host_{{ host }}_known:
   module.run:
     - name: ssh.set_known_host
     - hostname: {{ host }}
     - user: {{ user }}
+{%- endif %}
 
 git_host_{{ host }}_setup:
   file.append:

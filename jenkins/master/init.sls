@@ -6,15 +6,15 @@
 {% set shell = jenkins.get('shell', '/bin/bash') -%}
 
 include:
-  - jenkins.systemd
-  - jenkins
-  - jenkins.nginx
+  - jenkins.install
   - jenkins.cli
   - jenkins.plugins
   - jenkins.views
   - jenkins.master.config
   - jenkins.git
+{%- if pillar.get('hookforward', None) %}
   - hookforward
+{%- endif %}
 
 ssh_key:
   cmd.run:

@@ -17,6 +17,8 @@ jenkins:
       - github
     skipped:
       - matrix-project
+  # Number of executors on the master
+  num_executors: 0
 
 nginx:
   use_upstart: false

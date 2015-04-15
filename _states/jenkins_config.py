@@ -5,6 +5,44 @@ import xml.etree.ElementTree as ET
 import salt.exceptions as exc
 
 
+default = """\
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson>
+  <disabledAdministrativeMonitors/>
+  <numExecutors>0</numExecutors>
+  <mode>NORMAL</mode>
+  <useSecurity>true</useSecurity>
+  <authorizationStrategy class="hudson.security.AuthorizationStrategy$Unsecured"/>
+  <securityRealm class="hudson.security.SecurityRealm$None"/>
+  <disableRememberMe>false</disableRememberMe>
+  <projectNamingStrategy class="jenkins.model.ProjectNamingStrategy$DefaultProjectNamingStrategy"/>
+  <workspaceDir>${JENKINS_HOME}/workspace/${ITEM_FULLNAME}</workspaceDir>
+  <buildsDir>${ITEM_ROOTDIR}/builds</buildsDir>
+  <jdks/>
+  <viewsTabBar class="hudson.views.DefaultViewsTabBar"/>
+  <myViewsTabBar class="hudson.views.DefaultMyViewsTabBar"/>
+  <clouds/>
+  <slaves/>
+  <quietPeriod>5</quietPeriod>
+  <scmCheckoutRetryCount>0</scmCheckoutRetryCount>
+  <views>
+    <hudson.model.AllView>
+      <owner class="hudson" reference="../../.."/>
+      <name>All</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+    </hudson.model.AllView>
+  </views>
+  <primaryView>All</primaryView>
+  <slaveAgentPort>0</slaveAgentPort>
+  <label></label>
+  <nodeProperties/>
+  <globalNodeProperties/>
+</hudson>
+"""  # noqa
+
+
 def managed(name, text='', create=False):
     """Manages jenkins config content for a given xpath.
 
@@ -33,8 +71,12 @@ def managed(name, text='', create=False):
     config_path = os.path.join(home, 'config.xml')
 
     if not os.path.exists(config_path):
-        ret['comment'] = 'Path `{0}` not found.'.format(config_path)
-        return ret
+        if test:
+            ret['comment'] = 'New config would have been written'
+            ret['result'] = None
+            return ret
+        else:
+            open(config_path, 'w').write(default)
 
     config = ET.parse(config_path)
 
