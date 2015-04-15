@@ -6,9 +6,7 @@
 {% set shell = jenkins.get('shell', '/bin/bash') -%}
 
 include:
-  - jenkins.systemd
-  - jenkins
-  - jenkins.nginx
+  - jenkins.install
   - jenkins.cli
   - jenkins.plugins
   - jenkins.views
