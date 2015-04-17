@@ -7,6 +7,11 @@
 {% set is_master = False -%}
 {% set master_ip = salt['publish.publish']('roles:jenkins-master', 'grains.get', 'fqdn', expr_form='grain').values()[0] -%}
 {% endif -%}
+{% if 'server_name' in jenkins %}
+{% set jenkins_hostname = jenkins.server_name %}
+{% else %}
+{% set jenkins_hostname = master_ip %}
+{% endif %}
 
 curl_pkg:
   pkg.latest:
@@ -24,7 +29,7 @@ libdir:
 
 cli_jar:
   cmd.run:
-    - name: curl --silent --show-error --retry 20 --fail -O http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
+    - name: curl --silent --show-error --retry 20 --fail -O http://{{ jenkins_hostname }}/jnlpJars/jenkins-cli.jar
     - cwd: {{ libdir }}
     - creates: {{ libdir }}/jenkins-cli.jar
     - require:
@@ -42,4 +47,4 @@ jenkins_cli:
     - template: jinja
     - defaults:
         jar: {{ libdir }}/jenkins-cli.jar
-        ip: {{ master_ip }}
+        ip: {{ jenkins_hostname }}
