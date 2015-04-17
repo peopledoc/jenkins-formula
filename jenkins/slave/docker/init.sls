@@ -3,10 +3,10 @@ include:
   - docker
   - jenkins.user
 
-extend:
-  jenkins_user:
-    user:
-      - groups:
-        - docker
-      - require:
-        - service: docker-service
+jenkins_group_docker:
+  module.run:
+    - name: user.chgroups
+    - m_name: jenkins
+    - groups:
+      - docker
+    - append: True
