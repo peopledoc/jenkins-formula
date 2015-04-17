@@ -9,6 +9,7 @@ hookforward:
 
 jenkins:
   home: /var/lib/jenkins
+  master: 127.0.0.1
   git:
     hosts:
       - github.com
