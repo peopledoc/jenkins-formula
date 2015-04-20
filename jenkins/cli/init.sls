@@ -1,11 +1,13 @@
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set libdir = '/usr/lib/jenkins' -%}
-{% if 'jenkins-master' in grains['roles'] -%}
-{% set is_master = True -%}
-{% set master_ip = grains['fqdn'] -%}
+{% set is_master = 'jenkins-master' in grains.roles -%}
+{% set master = salt['pillar.get']('jenkins:server_name') -%}
+{% if not master -%}
+{% if is_master -%}
+{% set master = grains['fqdn'] -%}
 {% else -%}
-{% set is_master = False -%}
-{% set master_ip = salt['publish.publish']('roles:jenkins-master', 'grains.get', 'fqdn', expr_form='grain').values()[0] -%}
+{% set master = salt['publish.publish']('roles:jenkins-master', 'grains.get', 'fqdn', expr_form='grain').values()[0] -%}
+{% endif -%}
 {% endif -%}
 
 curl_pkg:
@@ -24,7 +26,7 @@ libdir:
 
 cli_jar:
   cmd.run:
-    - name: curl --silent --show-error --retry 20 --fail -O http://{{ master_ip }}/jnlpJars/jenkins-cli.jar
+    - name: curl --silent --show-error --retry 20 --fail -O http://{{ master }}/jnlpJars/jenkins-cli.jar
     - cwd: {{ libdir }}
     - creates: {{ libdir }}/jenkins-cli.jar
     - require:
@@ -42,4 +44,4 @@ jenkins_cli:
     - template: jinja
     - defaults:
         jar: {{ libdir }}/jenkins-cli.jar
-        ip: {{ master_ip }}
+        host: {{ master }}
