@@ -9,6 +9,13 @@ git:
   pkg.installed:
     - reload_modules: True
 
+prune:
+  git.config:
+    - name: fetch.prune
+    - value: true
+    - user: {{ user }}
+    - is_global: True
+
 dotssh_dir:
   file.directory:
     - name: {{ home }}/.ssh
