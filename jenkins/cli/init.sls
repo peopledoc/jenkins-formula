@@ -6,7 +6,7 @@
 {% if is_master -%}
 {% set master = grains['fqdn'] -%}
 {% else -%}
-{% set master = salt['publish.publish']('roles:jenkins-master', 'grains.get', 'fqdn', expr_form='grain').values()[0] -%}
+{% set master = salt['mine.get']('roles:jenkins-master', 'fqdn', expr_form='grain').values()[0] -%}
 {% endif -%}
 {% endif -%}
 
