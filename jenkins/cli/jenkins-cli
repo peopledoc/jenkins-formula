@@ -11,7 +11,7 @@ case $1 in
 	exit 0
 	;;
     wait-master-online)
-	exec curl --silent --show-error --head --retry 20 $URL >/dev/null
+	exec curl --silent --show-error --head --retry 300 --retry-delay 1 $URL >/dev/null
 	;;
     *)
 	$0 wait-master-online
