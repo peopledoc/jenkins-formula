@@ -26,7 +26,7 @@ libdir:
 
 cli_jar:
   cmd.run:
-    - name: curl --silent --show-error --retry 20 --fail -O http://{{ master }}/jnlpJars/jenkins-cli.jar
+    - name: curl --silent --show-error --retry 300 --retry-delay 1 --fail -O http://{{ master }}/jnlpJars/jenkins-cli.jar
     - cwd: {{ libdir }}
     - creates: {{ libdir }}/jenkins-cli.jar
     - require:
