@@ -24,7 +24,7 @@ def _update(name, skipped=None, updateall=True):  # noqa
     try:
         stdout = runcli('list-plugins')
     except exc.CommandExecutionError as e:
-        ret['comment'] = e.message
+        ret['comment'] = "Failed to list plugins: %r" % (e.message,)
         return ret
 
     # match with ex.: 'maven-plugin  Maven plugin  2.7.1 (2.8)'
@@ -48,10 +48,8 @@ def _update(name, skipped=None, updateall=True):  # noqa
             try:
                 runcli('install-plugin', name)
             except exc.CommandExecutionError as e:
-                ret['comment'] = e.message
+                ret['comment'] = "Failed to instal plugins: %s" % (e.message,)
                 return ret
-        else:
-            pass
 
         ret['changes'][name] = {
             'old': current,
@@ -108,7 +106,7 @@ def installed(name):
 
     # installed
     if status == IS_INSTALLED:
-        ret['result'] = None if test else True
+        ret['result'] = True
         return ret
 
     # install

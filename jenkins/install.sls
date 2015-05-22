@@ -1,6 +1,7 @@
 include:
   - jenkins.systemd
   - jenkins
+  - nginx
   - jenkins.nginx
 
 running:

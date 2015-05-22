@@ -31,7 +31,8 @@ def runcli(*args, **kwargs):
     p.wait()
 
     if p.returncode != 0:
-        raise exc.CommandExecutionError(p.stderr.read())
+        message = p.stdout.read() + "\n" + p.stderr.read()
+        raise exc.CommandExecutionError(message)
 
     return p.stdout.read()
 
