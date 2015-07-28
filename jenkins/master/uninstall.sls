@@ -3,7 +3,6 @@
 
 include:
   - jenkins.cli.uninstall
-  - hookforward.uninstall
 
 remove_site:
   file.absent:
