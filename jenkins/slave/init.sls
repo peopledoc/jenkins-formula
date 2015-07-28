@@ -22,13 +22,12 @@ include:
   - jenkins.cli
   - jenkins.git
 
-jre:
+slave_pkgs:
   pkg.latest:
-    - name: default-jre-headless
-
-ssh:
-  pkg.latest:
-    - name: openssh-server
+    - pkgs:
+        - default-jre-headless
+        - ntpdate
+        - openssh-server
 
 allow_master_key:
   ssh_auth.present:
