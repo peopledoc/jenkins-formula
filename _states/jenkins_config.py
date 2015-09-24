@@ -43,7 +43,7 @@ default = """\
 """  # noqa
 
 
-def managed(name, text='', create=False):
+def managed(name, text='', create=False, **kwargs):
     """Manages jenkins config content for a given xpath.
 
     name
