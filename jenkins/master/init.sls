@@ -11,6 +11,7 @@ include:
   - jenkins.plugins
   - jenkins.views
   - jenkins.master.config
+  - jenkins.master.credentials
   - jenkins.git
 
 ssh_key:
@@ -23,17 +24,6 @@ ssh_config:
   file.append:
     - name: {{ home }}/.ssh/config
     - source: salt://jenkins/master/ssh_config
-
-jenkins_credentials:
-  file.managed:
-    - name: {{ home }}/credentials.xml
-    - mode: 0644
-    - user: {{ user }}
-    - group: {{ group }}
-    - template: jinja
-    - source: salt://jenkins/master/credentials.xml
-    - defaults:
-        user: {{ user }}
 
 jenkins_nodeMonitors:
   file.managed:
@@ -64,3 +54,4 @@ jenkins_safe_restart:
 {%- endif %}
       - file: jenkins_credentials
       - file: jenkins_nodeMonitors
+      - cmd: jenkins_credentials_modified
