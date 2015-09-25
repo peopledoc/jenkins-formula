@@ -38,11 +38,17 @@ def runcli(*args, **kwargs):
     p.stdin.close()
     p.wait()
 
+    stdout = p.stdout.read()
+    log.debug("runcli stdout:\n%s", stdout)
+
+    stderr = p.stderr.read()
+    log.debug("runcli stderr:\n%s", stderr)
+
     if p.returncode != 0:
-        message = p.stdout.read() + "\n" + p.stderr.read()
+        message = stdout + "\n" + stderr
         raise exc.CommandExecutionError(message)
 
-    return p.stdout.read()
+    return stdout
 
 
 def formatdiff(old, new):
