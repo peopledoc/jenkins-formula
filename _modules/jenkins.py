@@ -18,23 +18,37 @@ def runcli(*args, **kwargs):
     if not os.path.exists(args[0]):
         raise exc.CommandExecutionError('jenkins-cli is not installed')
 
+    input_ = kwargs.get('input_')
+    if input_:
+        try:
+            input_ = input_.encode('utf-8')
+        except Exception, e:
+            log.debug("%r", input_)
+            log.error("%s", e)
+
     p = subprocess.Popen(
         args,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         stdin=subprocess.PIPE)
 
-    input_ = kwargs.get('input_')
     if input_:
         p.stdin.write(input_)
+
     p.stdin.close()
     p.wait()
 
+    stdout = p.stdout.read()
+    log.debug("runcli stdout:\n%s", stdout)
+
+    stderr = p.stderr.read()
+    log.debug("runcli stderr:\n%s", stderr)
+
     if p.returncode != 0:
-        message = p.stdout.read() + "\n" + p.stderr.read()
+        message = stdout + "\n" + stderr
         raise exc.CommandExecutionError(message)
 
-    return p.stdout.read()
+    return stdout
 
 
 def formatdiff(old, new):
@@ -45,10 +59,10 @@ def formatdiff(old, new):
         return
 
     last_line = diff[-1]
-    if not last_line.endswith('\n'):
-        last_line += '\n\ No newline at end of file\n'
+    if not last_line.endswith(u'\n'):
+        last_line += u'\n\ No newline at end of file\n'
     diff[-1] = last_line
-    return ''.join(diff)
+    return u''.join(diff)
 
 
 def restart(wait_online=True):
@@ -78,27 +92,33 @@ def update_or_create_xml(name, xml, old=None,
 
     get = get or 'get-%s' % object_
 
-    if type(xml) in (str, unicode):
+    if type(xml) is unicode:
+        # Wish the xml declared as UTF-8.
+        xml = xml.encode('utf-8')
+
+    if type(xml) is str:
         try:
             xml = ET.fromstring(xml)
         except Exception as e:
             ret['comment'] = str(e.message)
             ret['comment'] += '\n'
-            ret['comment'] += xml
+            ret['comment'] += xml.decode('utf-8')
             return ret
 
     new = """<?xml version="1.0" encoding="UTF-8"?>\n"""
     new += ET.tostring(xml.find('.'), encoding='utf-8')
     # Follow jenkins-cli convention
     new = new.replace(" />", "/>")
+    new = new.decode('utf-8')
 
     try:
         if old is None:
             old = runcli(get, name)
         # Jenkins sometimes returns \n after <?xml
         old = old.replace("?><", "?>\n<")
+        old = old.decode('utf-8')
     except Exception:
-        old = ''
+        old = u''
         command = create or 'create-%s' % object_
     else:
         command = update or 'update-%s' % object_
@@ -108,7 +128,10 @@ def update_or_create_xml(name, xml, old=None,
         ret['result'] = True
         return ret
 
-    ret['changes']['diff'] = formatdiff(old, new)
+    # Compat with salt.states.format_log
+    ret['changes']['xmldiff'] = formatdiff(old, new).encode('utf-8')
+
+    log.debug(u"Sending %s %s:\n%s", command, name, new)
 
     if test:
         ret['result'] = None
