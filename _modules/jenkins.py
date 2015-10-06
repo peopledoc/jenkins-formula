@@ -80,7 +80,8 @@ def restart(wait_online=True):
 
 
 def update_or_create_xml(name, xml, old=None,
-                         object_=None, get=None, create=None, update=None):
+                         object_=None, get=None, create=None, update=None,
+                         delete=None, recreate_callback=None):
     runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
@@ -134,11 +135,29 @@ def update_or_create_xml(name, xml, old=None,
 
     log.debug(u"Sending %s %s:\n%s", command, name, new)
 
+    # Hack to overwrite job with new class
+    if recreate_callback and old:
+        if recreate_callback(old, new):
+            log.debug(
+                "Detected %s %r type change. Deleting %s first.",
+                object_, name, object_
+            )
+            ret['comment'] = "job type changed. Old job removed."
+            command = delete or 'delete-%s' % (object_,)
+            try:
+                if not test:
+                    runcli(command, name)
+            except exc.CommandExecutionError as e:
+                ret['comment'] = "Failed to destroy old %s: %r" % (
+                    object_, e.message,)
+                return ret
+            log.debug("Recreating %s %r", object_, name)
+            command = create or 'create-%s' % (object_,)
+
     if test:
         ret['result'] = None
         return ret
 
-    # update if not testing
     try:
         runcli(command, name, input_=new)
     except exc.CommandExecutionError as e:
