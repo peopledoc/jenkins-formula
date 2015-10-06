@@ -18,6 +18,7 @@ def runcli(*args, **kwargs):
     if not os.path.exists(args[0]):
         raise exc.CommandExecutionError('jenkins-cli is not installed')
 
+    log.info("Calling %r", args)
     input_ = kwargs.get('input_')
     if input_:
         try:
@@ -38,14 +39,14 @@ def runcli(*args, **kwargs):
     p.stdin.close()
     p.wait()
 
-    stdout = p.stdout.read()
-    log.debug("runcli stdout:\n%s", stdout)
+    stdout = p.stdout.read().decode('utf-8')
+    log.debug(u"runcli stdout:\n%s", stdout)
 
-    stderr = p.stderr.read()
-    log.debug("runcli stderr:\n%s", stderr)
+    stderr = p.stderr.read().decode('utf-8')
+    log.debug(u"runcli stderr:\n%s", stderr)
 
     if p.returncode != 0:
-        message = stdout + "\n" + stderr
+        message = stdout + u"\n" + stderr
         raise exc.CommandExecutionError(message)
 
     return stdout
@@ -116,8 +117,8 @@ def update_or_create_xml(name, xml, old=None,
             old = runcli(get, name)
         # Jenkins sometimes returns \n after <?xml
         old = old.replace("?><", "?>\n<")
-        old = old.decode('utf-8')
-    except Exception:
+    except Exception, e:
+        log.info("Job %r not found, creation: %r", name, e)
         old = u''
         command = create or 'create-%s' % object_
     else:
