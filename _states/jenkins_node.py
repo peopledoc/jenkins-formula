@@ -14,8 +14,11 @@ _create_xml_template = """\
   <remoteFS>{node_slave_home}</remoteFS>
   <numExecutors>{executors}</numExecutors>
   <mode>NORMAL</mode>
-  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
-  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Demand">
+    <inDemandDelay>0</inDemandDelay>
+    <idleDelay>1440</idleDelay>
+  </retentionStrategy>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.10">
     <host>{host}</host>
     <port>{ssh_port}</port>
     <credentialsId>{cred_id}</credentialsId>
