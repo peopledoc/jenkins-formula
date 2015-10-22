@@ -1,3 +1,5 @@
+{% from 'ci/map.jinja' import jenkins %}
+
 {% set jenkins = pillar.get('jenkins', {}) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
@@ -5,7 +7,6 @@
 {% set master_key = keys.values()[0] %}
 {% set labels = grains.get('jenkins', {}).get('labels', []) -%}
 {% set node = grains.get('jenkins', {}).get('name', grains['nodename']) -%}
-{% set num_executors = grains.get('jenkins', {}).get('executors', grains['num_cpus']) -%}
 
 {% set master = jenkins.get('master') -%}
 {% if not master -%}
@@ -34,7 +35,7 @@ slave_node:
     - name: {{ node }}
     - host: {{ host }}
     - remote_fs: {{ home }}
-    - num_executors: {{ num_executors }}
+    - num_executors: {{ jenkins.node.num_executors }}
     - credential: master-ssh
 {%- if labels %}
     - labels:

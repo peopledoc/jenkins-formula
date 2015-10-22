@@ -1,0 +1,2 @@
+node:
+  num_executors: {{ salt['grains.get']('num_cpus') }}
