@@ -3,6 +3,12 @@
 import os
 
 
+def _recreate_job_check(old, new):
+    old_cls = old.splitlines()[-1]
+    new_cls = new.splitlines()[-1]
+    return old_cls != new_cls
+
+
 def present(name, source, template=None, context=None):
     update_or_create_xml = __salt__['jenkins.update_or_create_xml']  # noqa
     get_file_str = __salt__['cp.get_file_str']  # noqa
@@ -16,7 +22,8 @@ def present(name, source, template=None, context=None):
     else:
         new = get_file_str(source)
 
-    return update_or_create_xml(name, new, object_='job')
+    return update_or_create_xml(
+        name, new, object_='job', recreate_callback=_recreate_job_check)
 
 
 def absent(name):
