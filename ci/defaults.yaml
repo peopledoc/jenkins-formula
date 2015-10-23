@@ -1,0 +1,9 @@
+node:
+  credentials: null
+  host: null
+  labels: []
+  name: {{ salt['grains.get']('nodename') }}
+  num_executors: {{ salt['grains.get']('num_cpus') }}
+  remote_fs: null
+slave:
+  master_key: null
