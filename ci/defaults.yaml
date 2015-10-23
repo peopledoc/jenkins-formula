@@ -1,6 +1,6 @@
 node:
   credentials: null
-  host: null
+  host: {{ salt['grains.get']('fqdn') }}
   labels: []
   name: {{ salt['grains.get']('nodename') }}
   num_executors: {{ salt['grains.get']('num_cpus') }}
