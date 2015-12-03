@@ -1,4 +1,4 @@
-{% from 'ci/map.jinja' import jenkins %}
+{% from 'jenkins/map.jinja' import jenkins %}
 
 slave_pkgs:
   pkg.latest:
