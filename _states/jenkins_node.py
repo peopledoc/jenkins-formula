@@ -89,6 +89,33 @@ def present(name, credential, host=None, labels=None, num_executors=None,
     return ret
 
 
+def connected(name):
+    runcli = __salt__['jenkins.runcli']  # noqa
+
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    if not __opts__['test']:  # noqa
+        try:
+            ret['comment'] = runcli('connect-node', name)
+            ret['changes'] = {
+                'connected': True,
+            }
+        except Exception, e:
+            ret['comment'] = e.message
+            return ret
+        else:
+            ret['result'] = True
+    else:
+        ret['result'] = None
+
+    return ret
+
+
 def absent(name):
     runcli = __salt__['jenkins.runcli']  # noqa
 
