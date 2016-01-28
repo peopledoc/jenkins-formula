@@ -4,6 +4,20 @@
 {% set removed = plugins.get('removed', []) -%}
 {% set skipped = plugins.get('skipped', []) -%}
 
+{% set java_security = '/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/security/java.security' -%}
+{% if salt['file.file_exists'](java_security) -%}
+allow_md5_algorithm:
+  file.replace:
+    - name: {{ java_security }}
+    - pattern: ^jdk.certpath.disabledAlgorithms.*
+    - repl: jdk.certpath.disabledAlgorithms=MD2, RSA keySize < 512
+
+jenkins_plugins_safe_restart:
+  jenkins.restart:
+    - watch:
+      - file: allow_md5_algorithm
+{%- endif %}
+
 {% if removed -%}
 remove_plugins:
   jenkins_plugins.removed:
