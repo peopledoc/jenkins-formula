@@ -8,37 +8,37 @@
 remove_plugins:
   jenkins_plugins.removed:
     - names:
-{% for name in removed %}
+{%- for name in removed %}
       - {{ name }}
-{% endfor -%}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
 {% if installed -%}
 install_plugins:
   jenkins_plugins.installed:
     - names:
-{% for name in installed %}
+{%- for name in installed %}
       - {{ name }}
-{% endfor -%}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
 update_plugins:
   jenkins_plugins:
     - updated
-{% if skipped %}
+{%- if skipped %}
     - skipped:
-{% for name in skipped %}
+{%- for name in skipped %}
       - {{ name }}
-{% endfor -%}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
 restart_after_install:
   jenkins.restart:
     - watch:
-{% if removed %}
+{%- if removed %}
       - jenkins_plugins: remove_plugins
-{% endif %}
-{% if installed %}
+{%- endif %}
+{%- if installed %}
       - jenkins_plugins: install_plugins
-{% endif %}
+{%- endif %}
       - jenkins_plugins: update_plugins
