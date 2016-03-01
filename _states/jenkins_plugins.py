@@ -69,7 +69,13 @@ def _info(name):
 
     # get info
     runcli = __salt__['jenkins.runcli']  # noqa
-    stdout = runcli('list-plugins {0}'.format(name))
+    try:
+        stdout = runcli('list-plugins {0}'.format(name))
+    except exc.CommandExecutionError as e:
+        if 'ERROR: No plugin with the name' in e.message:
+            return NOT_AVAILABLE, 'Error in listing {}'.format(name)
+        else:
+            raise
 
     # check info
     RE_INSTALL = '(\w.+?)\s.*\s(\d+.*)'
