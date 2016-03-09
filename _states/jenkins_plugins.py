@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+import logging
 import os
 import re
 import shutil
@@ -6,126 +8,117 @@ import shutil
 import salt.exceptions as exc
 
 
-def _update(name, skipped=None, updateall=True):  # noqa
+logger = logging.getLogger(__name__)
 
+
+(
+    UNINSTALLED,
+    INSTALLED,
+    UPGRADABLE,
+) = range(3)
+
+
+# Sample output ouf `list-plugins`
+#
+# translation                   Translation Assistance plugin         1.12
+# maven-plugin                  Maven Integration plugin              2.7.1 (2.12.1)  # noqa
+#
+_list_re = re.compile(
+    '(?P<name>\S+)'
+    '.*?'
+    '(?P<installed>\d[\d.]*)'
+    '(?: \((?P<available>\d[\d.-]*)\))?'
+    '\n',
+)
+
+
+def _info(name):
+    runcli = __salt__['jenkins.runcli']  # noqa
+    try:
+        stdout = runcli('list-plugins {0}'.format(name))
+    except exc.CommandExecutionError as e:
+        if 'ERROR: No plugin with the name' in e.message:
+            return UNINSTALLED, 'Error in listing {}'.format(name), None
+        else:
+            raise
+
+    m = _list_re.match(stdout)
+    if not m:
+        return UNINSTALLED, '{} not found'.format(name), None
+
+    _, installed, available = m.groups()
+
+    if available:
+        return UPGRADABLE, installed, available
+
+    return INSTALLED, installed, None
+
+
+def _install(name, current_version=None, available_version=None):
     ret = {
         'name': name,
-        'changes': {},
+        'changes': {
+            'old': current_version or 'uninstalled',
+            'new': available_version or True,
+        },
         'result': False,
-        'comment': ''
+        'comment': 'Would install %s' % (name,)
     }
-
-    update_list = [] if updateall else [name]
-    skipped = skipped or []
 
     runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
-    try:
-        stdout = runcli('list-plugins')
-    except exc.CommandExecutionError as e:
-        ret['comment'] = "Failed to list plugins: %r" % (e.message,)
-        return ret
+    if not test:
+        try:
+            runcli('install-plugin', name)
+        except exc.CommandExecutionError as e:
+            ret['comment'] = "Failed to install plugins: %s" % (e.message,)
+            return ret
+        else:
+            ret['comment'] = 'Plugin installed successfully'
 
-    # match with ex.: 'maven-plugin  Maven plugin  2.7.1 (2.8)'
-    RE_UPDATE = '(\w.+?)\s.*\s(\d+.*) \((.*)\)'
-    for l in stdout.strip().split('\n'):
-
-        m = re.match(RE_UPDATE, l)
-        # no need to update
-        if not m:
-            continue
-
-        name, current, update = m.groups()
-        # no need to update
-        if update_list and name not in update_list:
-            continue
-        # skipped
-        if name in skipped:
-            continue
-
-        if not test:
-            try:
-                runcli('install-plugin', name)
-            except exc.CommandExecutionError as e:
-                ret['comment'] = "Failed to instal plugins: %s" % (e.message,)
-                return ret
-
-        ret['changes'][name] = {
-            'old': current,
-            'new': update,
-        }
-
+    ret['result'] = None if test else True
     return ret
 
 
-(
-    IS_INSTALLED,
-    NOT_AVAILABLE
-) = range(2)
-
-
-def _info(name):
-
-    # get info
-    runcli = __salt__['jenkins.runcli']  # noqa
-    stdout = runcli('list-plugins {0}'.format(name))
-
-    # check info
-    RE_INSTALL = '(\w.+?)\s.*\s(\d+.*)'
-    m = re.match(RE_INSTALL, stdout)
-    if not m:
-        return NOT_AVAILABLE, 'Invalid info for {0}: {1}'.format(name, stdout)
-
-    __, version = m.groups()
-    return IS_INSTALLED, version
-
-
-def installed(name):
+def installed(name, update=False):
     """Ensures jenkins plugins are present.
 
     name
         The name of one specific plugin to ensure.
     """
-    ret = _update(name, updateall=False)
+    ret = {
+        'name': name,
+        'result': False,
+        'comment': '',
+        'changes': {},
+    }
 
     runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
-    # just updated
-    if name in ret['changes']:
-        ret['result'] = None if test else True
-        return ret
-
-    # get info before install
+    if name.endswith('.hpi'):
+        plugin_name = os.path.basename(name[:-4])
+    else:
+        plugin_name = name
     try:
-        status, info = _info(name)
+        status, installed, available = _info(plugin_name)
     except exc.CommandExecutionError as e:
         ret['comment'] = e.message
         return ret
 
-    # installed
-    if status == IS_INSTALLED:
+    if status == UNINSTALLED:
+        ret = _install(name)
+    elif status == INSTALLED:
+        ret['comment'] = 'Already installed'
         ret['result'] = True
-        return ret
+    elif status == UPGRADABLE:
+        if update:
+            ret = _install(name, installed, available)
+        else:
+            ret['comment'] = 'Not updated'
+            ret['result'] = True
 
-    # install
-    if not test:
-        try:
-            runcli('install-plugin {0}'.format(name))
-        except exc.CommandExecutionError as e:
-            ret['comment'] = e.message
-            return ret
-    else:
-        pass
-
-    # fresh install
-    ret['changes'] = {
-        'old': None,
-        'new': True,
-    }
-
-    ret['result'] = None if test else True
     return ret
 
 
@@ -173,7 +166,7 @@ def removed(name):
         return ret
 
     # removed
-    if status == IS_INSTALLED and _uninstall(name):
+    if status == INSTALLED and _uninstall(name):
         ret['changes'] = {
             'old': info,
             'new': None,
@@ -196,9 +189,53 @@ def updated(name, skipped=None, updateall=True):
         Boolean flag if we want to update all the updateable plugins
         (default: True).
     """
+    ret = {
+        'name': name,
+        'changes': {},
+        'result': False,
+        'comment': ''
+    }
+
+    update_list = [] if updateall else [name]
+    skipped = skipped or []
+
+    runcli = __salt__['jenkins.runcli']  # noqa
     test = __opts__['test']  # noqa
 
-    ret = _update(name, skipped=skipped, updateall=updateall)
+    try:
+        stdout = runcli('list-plugins')
+    except exc.CommandExecutionError as e:
+        ret['comment'] = "Failed to list plugins: %r" % (e.message,)
+        return ret
 
-    ret['result'] = None if test else True
+    for line in stdout.splitlines():
+        m = _list_re.match(line)
+        if not m:
+            continue
+
+        name, current, update = m.groups()
+        if update_list and name not in update_list:
+            continue
+
+        if not update:
+            continue
+
+        if name in skipped:
+            logger.debug("%s %s available, but skipping", name, update)
+            continue
+
+        if not test:
+            try:
+                runcli('install-plugin', name)
+            except exc.CommandExecutionError as e:
+                ret['comment'] = "Failed to instal plugins: %s" % (e.message,)
+                return ret
+
+        ret['changes'][name] = {
+            'old': current,
+            'new': update,
+        }
+
+    ret['comment'] = 'Plugins uptodate'
+    ret['result'] = None if test and ret['changes'] else True
     return ret
