@@ -7,6 +7,8 @@ CPUQuota={{ cpuquota }}
 Environment=JENKINS_HOME=/var/lib/jenkins
 ExecStart=/usr/bin/java -Dorg.kohsuke.stapler.compression.CompressionFilter.disabled=true -Djava.awt.headless=true -Dhudson.DNSMultiCast.disabled=true -jar /usr/share/jenkins/jenkins.war --webroot=/var/cache/jenkins/war --httpPort=8080 --ajp13Port=-1
 User=jenkins
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
