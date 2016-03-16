@@ -19,6 +19,3 @@ Install a jenkins instance with no executor and an SSH credential.
 ---------------
 
 Register a dumb node on the master.
-
-All states have a ``.uninstall`` relative states to (mostly) undo the
-states. Beware, it erase all data !
