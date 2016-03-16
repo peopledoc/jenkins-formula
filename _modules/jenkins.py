@@ -3,7 +3,7 @@ import os
 import difflib
 import logging
 import subprocess
-
+import time
 import xml.etree.ElementTree as ET
 
 import salt.exceptions as exc
@@ -74,8 +74,13 @@ def restart(wait_online=True):
     """
 
     runcli('safe-shutdown')
+    # Wait jenkins is idle.
+    runcli('wait-idle')
+    # Sleep 20s to let jenkins service restart
+    time.sleep(20)
 
     if wait_online:
+        # Now wait jenkins is ready
         runcli('wait-master-online')
 
 

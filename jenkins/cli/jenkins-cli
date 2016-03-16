@@ -13,6 +13,17 @@ case $1 in
     wait-master-online)
 	exec curl --silent --show-error --head --retry 300 --retry-delay 1 $URL >/dev/null
 	;;
+    wait-idle)
+        for i in $(seq 600) ; do
+            busy=$(curl "$URL/computer/api/xml?xpath=/computerSet/busyExecutors/text()")
+            if [ "$busy" -eq 0 ] ; then
+                exit 0
+            fi
+            sleep $i
+        done
+        echo "Failed to get jenkins clean in time" >&2
+        exit 1
+	;;
     *)
 	$0 wait-master-online
 	exec java -jar {{ jar }} -s $URL $@
