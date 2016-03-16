@@ -69,7 +69,9 @@ def present(name, cls, args, **kwargs):
     groovy = render_create_credentials_script(cls, name, args)
     try:
         logger.debug(u"Execute groovy script \n%s", groovy)
-        if not test:
+        if test:
+            status = 'CREATED'
+        else:
             status = _runcli('groovy', '=', input_=groovy).strip()
             assert 'FAILED' != status, "Groovy failed"
     except Exception, e:
