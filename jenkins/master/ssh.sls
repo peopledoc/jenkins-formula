@@ -1,14 +1,12 @@
-{% set jenkins = pillar.get('jenkins', {}) -%}
-{% set home = jenkins.get('home', '/usr/local/jenkins') -%}
-{% set user = jenkins.get('user', 'jenkins') -%}
+{% from 'jenkins/map.jinja' import jenkins -%}
 
 ssh_key:
   cmd.run:
-    - name: test -f  {{ home }}/.ssh/id_rsa || ssh-keygen -q -N '' -f {{ home }}/.ssh/id_rsa
-    - user: {{ user }}
-    - creates: {{ home }}/.ssh/id_rsa
+    - name: test -f  {{ jenkins.home }}/.ssh/id_rsa || ssh-keygen -q -N '' -f {{ jenkins.home }}/.ssh/id_rsa
+    - user: {{ jenkins.user }}
+    - creates: {{ jenkins.home }}/.ssh/id_rsa
 
 ssh_config:
   file.append:
-    - name: {{ home }}/.ssh/config
+    - name: {{ jenkins.home }}/.ssh/config
     - source: salt://jenkins/master/ssh_config
