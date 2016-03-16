@@ -1,20 +1,10 @@
-{% set jenkins = pillar.get('jenkins', {}) -%}
-{% set libdir = '/usr/lib/jenkins' -%}
-{% set is_master = 'jenkins-master' in grains.roles -%}
-{% set master = salt['pillar.get']('jenkins:server_name') -%}
-{% if not master -%}
-{% if is_master -%}
-{% set master = grains['fqdn'] -%}
-{% else -%}
-{% set master = salt['mine.get']('roles:jenkins-master', 'fqdn', expr_form='grain').values()[0] -%}
-{% endif -%}
-{% endif -%}
+{% from 'jenkins/map.jinja' import jenkins -%}
 
 curl_pkg:
   pkg.latest:
     - name: curl
 
-{% if is_master -%}
+{% if jenkins.master.me -%}
 force_jenkins_restart:
   cmd.run:
     - name: service jenkins restart
@@ -22,17 +12,17 @@ force_jenkins_restart:
 
 libdir:
   file.directory:
-    - name: {{ libdir }}
+    - name: {{ jenkins.libdir }}
 
 cli_jar:
   cmd.run:
-    - name: curl --silent --show-error --retry 300 --retry-delay 1 --fail -O http://{{ master }}/jnlpJars/jenkins-cli.jar
-    - cwd: {{ libdir }}
-    - creates: {{ libdir }}/jenkins-cli.jar
+    - name: curl --silent --show-error --retry 300 --retry-delay 1 --fail -O {{ jenkins.url }}/jnlpJars/jenkins-cli.jar
+    - cwd: {{ jenkins.libdir }}
+    - creates: {{ jenkins.libdir }}/jenkins-cli.jar
     - require:
       - pkg: curl_pkg
       - file: libdir
-{%- if is_master %}
+{%- if jenkins.master.me %}
       - cmd: force_jenkins_restart
 {%- endif %}
 
@@ -43,5 +33,5 @@ jenkins_cli:
     - mode: 0750
     - template: jinja
     - defaults:
-        jar: {{ libdir }}/jenkins-cli.jar
-        host: {{ master }}
+        jar: {{ jenkins.libdir }}/jenkins-cli.jar
+        host: {{ jenkins.master.fqdn }}

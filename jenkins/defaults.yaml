@@ -2,12 +2,15 @@ pkgs: [jenkins]
 user: jenkins
 group: jenkins
 home: /var/lib/jenkins
+libdir: /usr/lib/jenkins
 config:
   numExecutors: 0
   scmCheckoutRetryCount: 5
   useSecurity: false
 credentials: {}
 master:
+  me: True
+  fqdn: {{ grains['fqdn'] }}
   {#- Defaults to 50% of all CPU available #}
   cpuquota: {{ '%s%%' % (50.0 * grains['num_cpus']) }}
   blockioweight: 800
