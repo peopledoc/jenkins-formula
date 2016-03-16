@@ -73,14 +73,11 @@ def restart(wait_online=True):
         Boolean flag if we want to wait online after install (default: True).
     """
 
-    runcli('safe-shutdown')
-    # Wait jenkins is idle.
-    runcli('wait-idle')
+    runcli('shutdown')
     # Sleep 20s to let jenkins service restart
     time.sleep(20)
 
     if wait_online:
-        # Now wait jenkins is ready
         runcli('wait-master-online')
 
 
