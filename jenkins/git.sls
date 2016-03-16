@@ -1,9 +1,4 @@
-{% set jenkins = pillar.get('jenkins', {}) -%}
-{% set home = jenkins.get('home', '/usr/local/jenkins') -%}
-{% set user = jenkins.get('user', 'jenkins') -%}
-{% set group = jenkins.get('user', user) -%}
-{% set git = jenkins.get('git', {}) -%}
-{% set git_hosts = git.get('hosts', []) -%}
+{% from 'jenkins/map.jinja' import jenkins -%}
 
 git:
   pkg.installed:
@@ -11,38 +6,38 @@ git:
 
 dotssh_dir:
   file.directory:
-    - name: {{ home }}/.ssh
+    - name: {{ jenkins.home }}/.ssh
     - mode: 0700
-    - user: {{ user }}
-    - group: {{ group }}
+    - user: {{ jenkins.user }}
+    - group: {{ jenkins.group }}
 
 git_key:
   file.managed:
-    - name: {{ home }}/.ssh/id_rsa_git
+    - name: {{ jenkins.home }}/.ssh/id_rsa_git
     - contents_pillar: jenkins:git:prvkey
     - mode: 0600
-    - user: {{ user }}
-    - group: {{ group }}
+    - user: {{ jenkins.user }}
+    - group: {{ jenkins.group }}
 
 ssh_config_mode:
   file.managed:
-    - name: {{ home }}/.ssh/config
-    - user: {{ user }}
-    - group: {{ group }}
+    - name: {{ jenkins.home }}/.ssh/config
+    - user: {{ jenkins.user }}
+    - group: {{ jenkins.group }}
     - mode: 0600
 
-{% for host in git_hosts -%}
-{% if not salt['ssh.get_known_host'](user, host) -%}
+{% for host in jenkins.git.hosts -%}
+{% if not salt['ssh.get_known_host'](jenkins.user, host) -%}
 git_host_{{ host }}_known:
   module.run:
     - name: ssh.set_known_host
     - hostname: {{ host }}
-    - user: {{ user }}
+    - user: {{ jenkins.user }}
 {%- endif %}
 
 git_host_{{ host }}_setup:
   file.append:
-    - name: {{ home }}/.ssh/config
+    - name: {{ jenkins.home }}/.ssh/config
     - text: |
         Host {{ host }}
              Identityfile ~/.ssh/id_rsa_git

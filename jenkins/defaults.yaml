@@ -2,6 +2,8 @@ pkgs: [jenkins]
 user: jenkins
 group: jenkins
 home: /var/lib/jenkins
+git:
+  hosts: []
 libdir: /usr/lib/jenkins
 config:
   numExecutors: 0
