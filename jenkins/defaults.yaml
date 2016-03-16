@@ -7,6 +7,10 @@ config:
   scmCheckoutRetryCount: 5
   useSecurity: false
 credentials: {}
+master:
+  {#- Defaults to 50% of all CPU available #}
+  cpuquota: {{ '%s%%' % (50.0 * grains['num_cpus']) }}
+  blockioweight: 800
 node:
   credentials: null
   host: {{ salt['grains.get']('fqdn') }}
