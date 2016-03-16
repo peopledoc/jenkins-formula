@@ -73,7 +73,12 @@ def restart(wait_online=True):
         Boolean flag if we want to wait online after install (default: True).
     """
 
-    runcli('shutdown')
+    try:
+        runcli('shutdown')
+    except Exception:
+        # Jenkins cli fails because jenkins close connection before answering…
+        pass
+
     # Sleep 20s to let jenkins service restart
     time.sleep(20)
 
