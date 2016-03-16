@@ -1,4 +1,4 @@
-{% set jenkins = pillar.get('jenkins', {}) -%}
+{% from 'jenkins/map.jinja' import jenkins -%}
 {% set user = jenkins.get('user', 'jenkins') -%}
 {% set group = jenkins.get('group', user) -%}
 {% set home = jenkins.get('home', '/usr/local/jenkins') -%}
@@ -12,6 +12,13 @@ jenkins_config_executors:
   jenkins_config.managed:
     - name: numExecutors
     - text: {{ num_executors }}
+
+{% for name, value in jenkins.config|dictsort %}
+jenkins_config_{{ name }}:
+  jenkins_config.managed:
+    - name: {{ name }}
+    - text: {{ value }}
+{% endfor %}
 
 jenkins_nodeMonitors:
   file.managed:

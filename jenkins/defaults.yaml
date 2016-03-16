@@ -2,6 +2,9 @@ pkgs: [jenkins]
 user: jenkins
 group: jenkins
 home: /var/lib/jenkins
+config:
+  scmCheckoutRetryCount: 5
+  useSecurity: false
 node:
   credentials: null
   host: {{ salt['grains.get']('fqdn') }}
