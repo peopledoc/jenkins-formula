@@ -7,6 +7,7 @@ git:
 libdir: /usr/lib/jenkins
 config:
   numExecutors: 0
+  primaryView: All
   scmCheckoutRetryCount: 5
   useSecurity: false
 credentials: {}
@@ -31,6 +32,9 @@ slave:
   master_key: null
 shell: /bin/bash
 url: http://{{ salt['grains.get']('fqdn') }}/
+views:
+  names: []
+  columns: []
 admin: nobody@nowhere
 
 port: 80

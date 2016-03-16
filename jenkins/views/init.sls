@@ -1,32 +1,10 @@
-{% set jenkins = pillar.get('jenkins', {}) -%}
-{% set views = jenkins.get('views', {}) -%}
-{% set names = views.get('names', []) -%}
-{% set columns = views.get('columns', []) -%}
-{% set default = views.get('default', 'All') -%}
+{% from 'jenkins/map.jinja' import jenkins -%}
 
-{%- if views %}
+{%- if jenkins.views %}
 views_present:
   jenkins_view.present:
-    - names:
-{%- for name in names %}
-      - {{ name }}
-{%- endfor %}
-{%- if columns %}
-    - columns:
-{%- for column in columns %}
-      - {{ column }}
-{%- endfor %}
+    - names: {{ jenkins.views.names }}
+{%- if jenkins.views.columns %}
+    - columns: {{ jenkins.views.columns }}
 {%- endif %}
-
-config_views:
-  jenkins_config.managed:
-    - name: primaryView
-    - text: {{ default }}
-    - require:
-      - jenkins_view: views_present
-
-config_views_reload:
-  jenkins_config.reloaded:
-    - watch:
-      - jenkins_config: config_views
 {%- endif %}
