@@ -73,7 +73,7 @@ def restart(wait_online=True):
         Boolean flag if we want to wait online after install (default: True).
     """
 
-    runcli('safe-restart')
+    runcli('safe-shutdown')
 
     if wait_online:
         runcli('wait-master-online')
