@@ -3,6 +3,7 @@ user: jenkins
 group: jenkins
 home: /var/lib/jenkins
 config:
+  numExecutors: 0
   scmCheckoutRetryCount: 5
   useSecurity: false
 node:
@@ -14,6 +15,7 @@ node:
   remote_fs: null
 slave:
   master_key: null
+shell: /bin/bash
 url: http://{{ salt['grains.get']('fqdn') }}/
 admin: nobody@nowhere
 
