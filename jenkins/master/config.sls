@@ -17,6 +17,8 @@ jenkins_location:
     - group: {{ jenkins.group }}
     - template: jinja
     - source: salt://jenkins/master/location.xml
+    - context:
+        jenkins: {{ jenkins|json }}
 
 jenkins_nodeMonitors:
   file.managed:
