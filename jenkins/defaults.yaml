@@ -6,6 +6,7 @@ config:
   numExecutors: 0
   scmCheckoutRetryCount: 5
   useSecurity: false
+credentials: {}
 node:
   credentials: null
   host: {{ salt['grains.get']('fqdn') }}

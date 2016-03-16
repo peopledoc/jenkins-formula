@@ -1,6 +1,6 @@
-{% set credentials = salt['pillar.get']('jenkins:credentials', {}) -%}
+{% from 'jenkins/map.jinja' import jenkins -%}
 
-{% for name, entry in credentials.items() -%}
+{% for name, entry in jenkins.credentials.items() -%}
 credentials_{{ name }}:
   jenkins_credentials.present:
     - cls: {{ entry.cls }}
