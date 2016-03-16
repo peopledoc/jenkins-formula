@@ -14,6 +14,8 @@ node:
   remote_fs: null
 slave:
   master_key: null
+url: http://{{ salt['grains.get']('fqdn') }}/
+admin: nobody@nowhere
 
 port: 80
 nginx_user: www-data

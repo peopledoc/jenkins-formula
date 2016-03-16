@@ -20,6 +20,15 @@ jenkins_config_{{ name }}:
     - text: {{ value }}
 {% endfor %}
 
+jenkins_location:
+  file.managed:
+    - name: {{ jenkins.home }}/jenkins.model.JenkinsLocationConfiguration.xml
+    - mode: 0644
+    - user: {{ jenkins.user }}
+    - group: {{ jenkins.group }}
+    - template: jinja
+    - source: salt://jenkins/master/location.xml
+
 jenkins_nodeMonitors:
   file.managed:
     - name: {{ home }}/nodeMonitors.xml
@@ -46,6 +55,7 @@ jenkins_config_modified:
         - jenkins_config: jenkins_config_executors
         - file: jenkins_nodeMonitors
         - file: jenkins_Shell
+        - file: jenkins_location
 
 {% if slave_agent_port -%}
 jenkins_config_slave_port:
