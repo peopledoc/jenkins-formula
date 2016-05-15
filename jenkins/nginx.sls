@@ -7,8 +7,6 @@
     - user: {{ jenkins.nginx_user }}
     - group: {{ jenkins.nginx_group }}
     - mode: 440
-    - require:
-      - pkg: jenkins
 
 /etc/nginx/sites-enabled/jenkins.conf:
   file.symlink:
