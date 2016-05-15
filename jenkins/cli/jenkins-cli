@@ -2,7 +2,7 @@
 
 set -eu
 
-URL="http://{{ host }}/"
+URL=${URL:-"http://{{ host }}/"}
 
 case $1 in
     # Implements master-url command locally
