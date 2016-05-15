@@ -1,5 +1,13 @@
 {% from "jenkins/map.jinja" import jenkins with context %}
 
+jenkins_nginx_logs:
+  file.directory:
+    - name: {{ jenkins.home }}/logs/nginx
+    - mode: 0775
+    - makedirs: True
+    - user: {{ jenkins.user }}
+    - group: www-data
+
 /etc/nginx/sites-available/jenkins.conf:
   file.managed:
     - template: jinja
@@ -13,6 +21,8 @@
     - target: /etc/nginx/sites-available/jenkins.conf
     - user: {{ jenkins.nginx_user }}
     - group: {{ jenkins.nginx_group }}
+    - require:
+        - file: jenkins_nginx_logs
 
 extend:
   nginx:
