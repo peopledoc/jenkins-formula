@@ -1,13 +1,11 @@
 {% from 'jenkins/map.jinja' import jenkins -%}
-{% set github_user = salt['pillar.get']('jenkins:github:username') -%}
-{% set github_token = salt['pillar.get']('jenkins:github:token') -%}
 
-{% for name, value in jenkins.config|dictsort %}
+{%- for name, value in jenkins.config|dictsort %}
 jenkins_config_{{ name }}:
   jenkins_config.managed:
     - name: {{ name }}
     - text: {{ value }}
-{% endfor %}
+{%- endfor %}
 
 jenkins_location:
   file.managed:
@@ -47,15 +45,17 @@ jenkins_config_modified:
         - file: jenkins_Shell
         - file: jenkins_location
 
-{% if github_user -%}
+{% if jenkins.github.username -%}
 jenkins_github_settings:
   file.managed:
     - name: {{ jenkins.home }}/com.cloudbees.jenkins.GitHubPushTrigger.xml
     - source: salt://jenkins/master/github.xml
+    - user: {{ jenkins.user }}
+    - group: {{ jenkins.group }}
     - template: jinja
     - defaults:
-        user: {{ github_user }}
-        token: {{ github_token }}
+        user: {{ jenkins.github.username }}
+        token: {{ jenkins.github.token }}
     - watched_in:
         - cmd: jenkins_config_modified
 {%- endif %}
